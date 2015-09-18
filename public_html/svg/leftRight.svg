@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" height="18" width="36">
+	<defs>
+	<marker id="end" markerWidth="13" markerHeight="13" refX="2" refY="6"
+           orient="auto">
+        <path d="M2,3 L2,9 L7,6 L2,3" style="fill: #000000;" />
+    </marker>
+    <marker id="start" markerWidth="13" markerHeight="13" refX="2" refY="6"
+           orient="180deg">
+        <path d="M2,3 L2,9 L7,6 L2,3" style="fill: #000000;" />
+    </marker>
+    </defs>
+    <path d="M13,9 L23,9" style="stroke: black; stroke-width: 2px; fill: black;
+                   marker-start: url(#start); marker-end: url(#end);"/>
+	
+</svg> 
+

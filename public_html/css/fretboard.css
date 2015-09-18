@@ -1,0 +1,377 @@
+html, body, .overContainer{
+	height: 100%;
+	width: 100%;
+	margin:0;
+	padding:0;
+
+}
+.overContainer{
+	position: relative;
+	background-color: #FFF6EB;
+}
+.mainContent{
+	display: flex;
+	position: absolute;
+	top: 26px;
+	left: 0;
+	right: 0;
+	bottom: 0;
+}
+.topBar{
+	position: absolute;
+	left: 0;
+	right: 0;
+	top: 0;
+	height: 26px;
+	white-space: no-wrap;
+}
+.topBar div{
+	display: inline-block;
+	margin: 2px 2px 0;
+}
+.fromFret .useGuitar{
+	display: none;
+}
+@media all and (orientation:landscape) and (max-height: 300px), (max-width: 600px){
+	.fretboard {
+		font-size: 75%;
+	}
+}
+@media all and (orientation:portrait) and (max-height: 600px), (max-width: 300px){
+	.fretboard {
+		font-size: 75%;
+	}
+}
+@media all and (orientation:landscape) {
+	.mainContent{
+		flex-direction: column;
+	}
+	.fretboard{
+		flex-direction: column;
+		overflow-x: scroll;
+		flex: 0 1 200px;
+	}
+	.toFret.playMode .fretboard{
+		flex: 0 1 400px;
+	}
+	.string{
+		flex-direction: row;
+	}
+	/*.note{
+		background-image: 
+			linear-gradient(0deg, transparent 45%, #954 50%, transparent 55%), 
+			linear-gradient(90deg, silver 4px, transparent 4px);
+	}*/
+	.expanded .string{
+		min-width: 1000px;
+	}
+	
+	.string:first-of-type .note::after{
+		left:4px;
+		top: 100%;
+		right: 0;
+		height: 600%;
+
+	}
+	.ansBtnBox{
+		flex-direction: row;
+	}
+	.ansBtns{
+		flex-direction: column-reverse;
+	}
+	.ansBtns>div{
+		flex-direction: row;
+	}
+	.ansBtnLabel span::after{
+		content:"/";
+	}
+	#toggleControls{
+		flex: 2 2 250px;
+	}
+	.questionDiv .questionIdentifier:after{
+		background-position: right;
+	}
+	
+}
+
+@media all and (orientation:portrait) {
+	.mainContent{
+		flex-direction: row-reverse;
+	}
+	.fretboard{
+		flex-direction: row-reverse;
+		flex: 0 2 300px;
+		overflow-y: scroll;
+	}
+	.toFret.playMode .fretboard{
+		flex: 0 2 400px;
+	}
+	.string{
+		flex-direction: column;
+		
+	}
+	/*.string:first-child{
+		z-index: 2;
+	}*/
+	.expanded .string{
+		min-height: 1000px;
+	}
+	
+	.string:first-of-type .note::after{
+		right:100%;
+		top: 4px;
+		bottom: 0;
+		width: 600%;
+	}
+	.ansBtnBox{
+		flex-direction: column;
+	}
+	.ansBtns{
+		flex-direction: row;
+	}
+	.ansBtns>div{
+		flex-direction: column;
+	}
+	.ansBtnLabel span::after{
+		content:" ";
+		display: inline-block;
+	}
+	#toggleControls{
+		flex: 2 1 250px;
+	}
+   .questionDiv .questionIdentifier:after{
+		background-position: bottom;
+	}
+}
+
+
+.fretboard{
+	display:flex;
+	background-color: #876;
+}
+.string{
+	display: flex;
+	flex-grow: 1;
+}
+.string:first-child .note, .note:first-child{
+	background-image:none;
+	background-color:#FFF6EB;
+
+}
+
+
+.string:first-child .note{
+	border-color: #FFF6EB;
+}
+.note{
+	display: inline-block;
+	position:relative;
+	
+}
+.note[data-fret]{
+	color: transparent;
+}
+.setupMode .note[data-fret]{
+	color: black;
+}
+.note.hideFretNums{
+	color: transparent;
+}
+.note:first-child{
+	flex-basis: 35px;
+}
+.noteName{
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	transform: translateX(-50%) translateY(-50%);
+}
+.string:first-of-type .note{
+	pointer-events: none;
+}
+.string:first-of-type .note::after{
+	position: absolute;
+	background-position: center;
+	background-repeat: no-repeat;
+}
+.string:first-of-type .note:nth-of-type(4)::after, 
+.string:first-of-type .note:nth-of-type(6)::after, 
+.string:first-of-type .note:nth-of-type(8)::after, 
+.string:first-of-type .note:nth-of-type(10)::after,
+.string:first-of-type .note:nth-of-type(16)::after,
+.string:first-of-type .note:nth-of-type(18)::after{
+	content: "";
+	background-image: url("../svg/single.svg");
+	pointer-events: inherit;
+
+}
+.string:first-of-type .note:nth-of-type(13)::after{
+	content: "";
+	background-image: url("../svg/singleDouble.svg");
+	pointer-events: inherit;
+}
+
+
+.ansBtnBox{
+	flex: 1 1 100px;
+	display: flex;
+	
+}
+.ansBtns{
+	flex: 0 1 500px;
+	display: flex;
+}
+.ansBtns>div{
+	flex: 1 0 auto;
+	display: flex;
+}
+.answerBtn{
+	flex: 2 0 auto;
+	border: 1px solid black;
+	border-radius: 5px;
+	position: relative;
+	margin: 3px;
+}
+.ansBtnSpacer{
+	flex: 1 0 0;
+}
+.ansBtnLabel{
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	transform: translateX(-50%) translateY(-50%);
+}
+.filler{
+	flex: 1 0 0;
+ 
+}
+
+.string, .string *, .ansBtns, .ansBtns *{
+	-webkit-touch-callout: none;
+	-webkit-user-select: none;
+	-khtml-user-select: none;
+	-moz-user-select: none;
+	-ms-user-select: none;
+	user-select: none;
+}
+.fromFret .questionDiv .questionIdentifier:after{
+	content:"";
+	position: absolute;
+	left:0;
+	right: 0;
+	top: 0;
+	bottom: 0;
+	z-index:4;
+	background-image: url("../svg/question.svg");
+	background-repeat:no-repeat;
+}
+/*.setupMode .noteName{
+	visibility: visible;
+
+}*/
+.string .note.available{
+	background-color: rgba(220,210,200,.7);
+}
+.fromFret.playMode .string .note.available{
+	background-color:rgba(0,0,0,0);
+}
+.fromFret.playMode .string .note.available:first-child{
+	background-color:#FFF6EB;
+}
+#scoreDisplayOverlay{
+	position: absolute;
+	left: 0;
+	top: 0;
+	right: 0;
+	bottom: 0;
+	display: none;
+	z-index: 50;
+}
+#scoreDisplayOverlayInner{
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	transform: translateX(-50%) translateY(-50%);
+	background-color: white;
+	border: 1px solid black;
+	border-radius: 5px;
+	padding: 15px;
+
+}
+#scoreDisplay>div{
+	margin: 10px;
+}
+[data-tuningForString].error{
+	outline: 2px solid red;
+}
+
+
+
+
+#toggleControls{
+	overflow-y: scroll;
+	padding: 5px 0px 0px 5px;
+}
+#toggleControls ul {
+	list-style-type: none;
+	padding: 0px;
+	margin: 0px;
+}
+#toggleControls h1{
+	font-size: medium;
+	padding: 0;
+	margin:0;
+}
+#toggleControls h1:before{
+	font-family: monospace;
+	content: "\25b6";
+}
+#toggleControls h1.expanded:before {
+	content: "\25bc";
+}
+#toggleControls h1 + ul{
+	display: none;
+}
+#toggleControls h1.expanded + ul{
+	display: block;
+}
+.toggleDiv{
+	display: flex;
+}
+.toggleTitle {
+	flex: 1 0 auto;
+	padding-right: 10px;
+}
+.addBtn, .removeBtn {
+	width: 25px;
+}
+input[data-tuningforstring] {
+	width: 50px;
+}
+.tuningDiv button{
+	margin-left: 10px;
+}
+#toggleControls ul ul{
+	padding-left: 5px;
+}
+div#toggleControls * {
+  max-width: 250px;
+  cursor: default;
+}
+.toggleExpand{
+	position: relative;
+}
+.toggleExpand:after{
+	content: " ";
+	position: absolute;
+	top: 0;
+	bottom: 0;
+	left: 0;
+	right: 0;
+	background-position: center;
+	background-repeat: no-repeat;
+	background-image: url("../svg/unbound.svg");
+}
+.expanded .toggleExpand:after{
+	background-image: url("../svg/bound.svg");
+}

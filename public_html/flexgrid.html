@@ -6,471 +6,345 @@ and open the template in the editor.
 -->
 <html class="vertical">
     <head>
-        <title>TODO supply a title</title>
+        <title>Fretboard Practice</title>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
         <script type="text/javascript" src="js/Fretboard.js"></script>
+        <script type="text/javascript" src="js/PitchListener.js"></script>
+        
+        <link rel="stylesheet" href="css/fretboard.css"></link>
+        
+        <style>
+			/*.toFretAvailableMarker{
+				position: absolute;
+				background-color: rgba(255, 255, 255, 0.7);
+				background-size: contain;
+				background-position: center;
+				background-repeat: no-repeat;
+				border: 2px solid red;
+				pointer-events: initial;
+				z-index: 51;
+				user-select: none;
+				display: none;
+				
+			}
+			.toFret .toFretAvailableMarker{
+				display: inline-block;
+			}
+			@media all and (orientation:landscape) {
+				.toFretAvailableMarker{
+					background-image: url("svg/leftRight.svg");
+				}
+			}
+			@media all and (orientation:portrait) {
+				.toFretAvailableMarker{
+					background-image: url("svg/upDown.svg");
+				}
+			}
+			
+			.toFret .string .note.toFretAvailable{
+				background-color: rgba(220,210,200,.7);
+			}
+
+			.toFret #toggleControls{
+				display: none!important;
+			}
+			*/
+        </style>
         <script>
+			/*function ToFretControls(){
+				function addMarker(fretNumber, stop){
+					console.log(fretNumber);
+					if(!fretNumber){
+						fretNumber = $(".marked").index();
+						fretNumber = fretNumber < 0 ? 0 : fretNumber;
+					}
+					console.log(fretNumber);
+					$(".toFretAvailableMarker").remove();
+					var first = $(".string:first-child .note").eq(fretNumber);
+					$("<div>").addClass("toFretAvailableMarker").appendTo(first)
+							.height(first.height())
+							.width(first.width())
+							.css({
+								position: "absolute"
+							}).offset(first.offset());
+					if(stop!=null) return;
+					selectFour(fretNumber);
+					
+				}
+				function selectFour(firstFret, marked){
+					marked = marked || $(".string:first-child .note").eq(firstFret);
+					$(".marked").removeClass("marked");
+					marked.addClass("marked");
+					$(".toFretAvailable").removeClass("toFretAvailable");
+					
+					function makeAvailable(i){
+						$(".string .note[data-id]:nth-of-type(" + (i+1) + ")").addClass("toFretAvailable");
+					}
+					for(var i=firstFret; i<firstFret + 4; i++){
+						makeAvailable(i);
+					}
+				}
+				function isPortrait(){
+					return window.innerHeight > window.innerWidth;
+				}
+				function getTouch(event){
+					return event.originalEvent.changedTouches ? event.originalEvent.changedTouches[0] : event;
+				}
+				function moveMarker(event){
+					event.preventDefault();
+					event.stopPropagation();
+					event = getTouch(event);
+					var marker = $(".toFretAvailableMarker");
+					var offset = marker.offset();
+					var over;
+					if(isPortrait()){
+						marker.offset({top: event.pageY - marker.height()/2, left: offset.left});
+						over = $(".string:first-child").find(".note").filter(function(){
+							var overOffset = $(this).offset();
+							return overOffset.top < event.pageY && 
+								overOffset.top + $(this).height() > event.pageY;
+						})
+					}else{
+						marker.offset({left: event.pageX - marker.width()/2, top: offset.top});
+						over = $(".string:first-child").find(".note").filter(function(){
+							var overOffset = $(this).offset();
+							return overOffset.left < event.pageX && 
+								overOffset.left + $(this).width() > event.pageX;
+						})
+					}
+					var index = over.index();
+					console.log(index);
+					if(over.hasClass("marked") || index > 15 || index <0) return;
+					selectFour(index, over);
+				}
+				var touchstart = "touchstart mousedown";
+				var touchmove = "touchmove mousemove";
+				var touchleave = "touchleave mouseleave";
+				var touchend = "touchend mouseup";
+				function endMoveListen(){
+					addMarker($(".marked").index(), true);
+					$("body").off(touchmove, moveMarker);
+					$("body").off(touchleave, endMoveListen);
+					$("body").off(touchend, endMoveListen);
+				}
+				$("body").on(touchstart, ".toFretAvailableMarker", function(event){
+					$("body").on(touchmove, moveMarker);
+					$("body").on(touchleave, endMoveListen);
+					$("body").on(touchend, endMoveListen);
+				})
+				
+				return {addMarker: addMarker};
+			}*/
+				
+			
+			
+			
+			
+			
+			
+        </script>
+        <script>
+			
+			/*
+			in to fret mode, there is a listener for clicks on available fret positions which registers actions.
+			available frets stay highlighted in play mode.
+			when game starts, the unique notes of the available fretspots are complied into a list
+				items of which are selected at random for questions.
+				
+			
+			*/
+			
             $(function() {
-                $("#toggle").click(function() {
+                $(".toggleExpand").click(function() {
                     $("body").toggleClass("expanded");
                 });
                 new Fretboard($(".fretboard"), $("#toggleControls"), $(".answerControls"));
+				stringCss();
             })
+            
+            function stringCss(){
+				var portrait = "@media all and (orientation:portrait) {\n";
+				var landscape = "@media all and (orientation:landscape) {\n";
+				
+				
+				
+				function colStop(stop){
+					return stop[0] + " " + stop[1] + stop[2];
+				}
+				function linGrad(angle, colStops){
+					var str = "linear-gradient(" + angle + ", ";
+					for(var i=0; i<colStops.length; i++){
+						if(i>0){
+							str += ", ";
+						}
+						str += colStop(colStops[i]);
+					}
+					str += ") ";
+					return str;
+				}
+				function forString(stringNum, halfwidth, color, depth){
+					stringNum++;
+					var stops0 = [
+						["transparent", 50-halfwidth, "%"],
+						["rgba(0,0,0," + depth+ ")", 50-halfwidth, "%"],
+						["transparent", 50, "%"],
+						["rgba(0,0,0," + depth+ ")", 50+halfwidth, "%"],
+						["transparent", 50+halfwidth, "%"]
+					
+					]
+					var stops1 = [
+						["transparent", 50-halfwidth, "%"],
+						[color, 50-halfwidth, "%"],
+						[color, 50+halfwidth, "%"],
+						["transparent", 50+halfwidth, "%"]
+					]
+					var stops2 = [
+						["silver", 4,"px"],
+						["transparent", 4, "px"]
+					]
+					var stops3 = [
+						["rgba(0,0,0,.4)", 0,"px"],
+						["transparent", 2.5, "px"],
+						["rgba(0,0,0,.4)", 4,"px"],
+						["transparent", 4, "px"]
+					]
+					portrait +=
+						"\t"+     ".string:nth-of-type(" + stringNum + ") .note{background-image: " +
+						"\n\t\t"+ linGrad("90deg", stops0) + ", " +
+						"\n\t\t"+ linGrad("90deg", stops1) + ", " + 
+						"\n\t\t"+ linGrad("180deg", stops3) + ", " + 
+						"\n\t\t"+ linGrad("180deg", stops2) +";}\n" + 
+						"\n\t"+   ".string:nth-of-type(" + stringNum + ") .note:first-child{background-image: none;}\n"
+					landscape +=
+						"\t"+      ".string:nth-of-type(" + stringNum + ") .note{background-image: " +
+						"\n\t\t"+ linGrad("0deg", stops0) + ", " +
+						"\n\t\t"+ linGrad("0deg", stops1) + ", " + 
+						"\n\t\t"+ linGrad("90deg", stops3) + ", " + 
+						"\n\t\t"+ linGrad("90deg", stops2) +";}\n" + 
+						"\t"+     ".string:nth-of-type(" + stringNum + ") .note:first-child{background-image: none;}\n"
+						
+				}
+					
+				forString( 1, 6, "#AAA", .5);
+				forString( 2, 7, "#AAA", .8);
+				forString( 3, 9, "#A97", .5);
+				forString( 4, 10, "#A97", .65);
+				forString( 5, 11, "#A97", .8);
+				forString( 6, 12, "#A97", .8);	
+				
+				portrait += "}"
+				landscape += "}"
+				$("<style>").html(portrait + "\n" + landscape).appendTo($("head"));
+			}
+            
         </script>
-        <!--<script>
-            var modeControlsDiv = $("#modeControls");
-            var fretboardDiv = $("#fretboard");
-            var toggleControlsDiv = $("#toggleControls");
-            var gameControlsDiv = $("#gameControls")
-
-            var noteNames = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
-            var tuning = ["E2", "A2", "D3", "G3", "B3", "E4"]
-            tuning.reverse();
-            var gameType = "fromFret";
-            var midi = [];
-            
-            $(function() {
-                
-                $("#toggle").click(function() {
-                    $("body").toggleClass("expanded");
-                });
-                for (var i = 0; i < 8; i++) {
-                    for (var j = 0; j < noteNames.length; j++) {
-                        midi.push(noteNames[j] + i);
-                    }
-                }
-                makeFretboard(tuning);
-
-            })
-            
-
-            function makeFretboard(tuning) {
-                var fretboardDiv = $(".fretboard");
-                fretboardDiv.empty();
-        
-                function makeFretLengthArray() {
-                    var ary = [0];
-                    function d(n) {
-                        return Math.pow(.5, (n / 12));
-                    }
-                    function width(n, divisor) {
-                        divisor = divisor ? divisor : 1;
-                        return (d(n - 1) - d(n)) / divisor;
-                    }
-                    for (var i = 0; i < 18; i++) {
-                        ary.push(width(i, 1 / 100))
-                    }
-                    ary.push(4);
-                    return ary;
-                }
-                function makeString(fretboardDiv, tuning, fretLengths, i){
-                    var stringNum = 0;
-                    var startNote = 0;
-                    var startIndex = 0;
-                    if(i>0){
-                        stringNum = i;
-                        startNote = tuning[stringNum-1];
-                        startIndex = midi.indexOf(startNote);
-                    }
-                    var string = $("<div>")
-                            .addClass("string")
-                            .css({"flex-grow": 1})
-                            .appendTo(fretboardDiv);
-                    if(stringNum !==0){
-                        string.attr("data-string", stringNum + " " + startNote);
-                    }
-                    for (var j = 0; j < fretLengths.length; j++) {
-                        makeNote(string, startIndex, fretLengths, stringNum, j);
-                    }   
-                }
-                function makeNote(string, startIndex, fretLengths, stringNum, fret){
-                                var note = $("<div>")
-                                .addClass("note")
-                                .css({"flex-grow": fretLengths[fret]})
-                                .appendTo(string);
-                        var noteNameDiv = $("<div>")
-                                .addClass("noteName")
-                                .text(fret)
-                                .appendTo(note);
-                        if(stringNum !== 0 && fret<19){
-                            var i = stringNum - 1;
-                            var noteName = midi[startIndex + fret];
-                            var accidental = noteName.length === 3;
-                            var octave = noteName[noteName.length - 1];
-                            var shortNote = noteName.substr(0, noteName.length - 1);
-                            note.attr({
-                                "data-id": i + "_" + fret,
-                                "data-fret": fret,
-                                "data-ocatave": octave,
-                                "data-shortNote": shortNote,
-                                "data-noteName": noteName,
-                                "data-accidental": accidental,
-                                "data-stringNum": stringNum
-                            });
-                            noteNameDiv.text(noteName)
-                            $("<div>").addClass("questionIdentifier").appendTo(note);
-                        }
-                        if(fret === 19){
-                            noteNameDiv.text("");
-                        }
-                }
-                var fretLengths = makeFretLengthArray();
-                for (var i = 0; i < 7; i++) {
-                    makeString(fretboardDiv, tuning, fretLengths, i);
-                }
-            }
-        </script>-->
+        <script>
+			$(function(){
+				$("input[name=gameType]").change(function(){
+					$(".overContainer").removeClass("toFret fromFret").addClass($("input[name=gameType]:checked").val())
+				})
+				$("input[name=gameType]").change();
+				
+			})
+        </script>
         <style>
-            html, body, .overContainer{
-                height: 100%;
-                width: 100%;
-                margin:0;
-                padding:0;
-
-            }
-            .overContainer{
-                display: flex;
-                flex-direction: column;
-            }
-            .mainContent{
-                flex: 1 1 auto;
-                display: flex;
-                width: 100%;
-            }
-            .topBar{
-                flex: 0 0 auto;
-
-            }
-            .topBar div{
-                display: inline-block;
-                margin: 2px 2px 0;
-            }
-            @media all and (orientation:landscape) and (max-height: 300px), (max-width: 600px){
-                .fretboard {
-                    font-size: 75%;
-                }
-            }
-            @media all and (orientation:portrait) and (max-height: 600px), (max-width: 300px){
-                .fretboard {
-                    font-size: 75%;
-                }
-            }
-            @media all and (orientation:landscape) {
-                .mainContent{
-                    flex-direction: column;
-                }
-                .fretboard{
-                    flex-direction: column;
-                    overflow-x: scroll;
-                    flex: 0 1 200px;
-                }
-                .string{
-                    flex-direction: row;
-                    background-image: linear-gradient(0deg, transparent 45%, #BBA 50%, transparent 55%);
-                }
-                .expanded .string{
-                    width: 1000px;
-                }
-                .note{
-                    border-right: 2px solid silver;
-                }
-                .note:first-child{
-                    border-right: 5px solid silver;
-                }
-                .note:last-child{
-                    border-right-width: 0;
-                }
-                .string:first-of-type .note::after{
-                    left:0;
-                    top: 100%;
-                    right: 0;
-                    height: 600%;
-
-                }
-                .ansBtnBox{
-                    flex-direction: row;
-                }
-                .ansBtns{
-                    flex-direction: column;
-                }
-                .ansBtns>div{
-                    flex-direction: row;
-                }
-                .ansBtnLabel span::after{
-                    content:"/";
-                }
-                
-            }
-
-            @media all and (orientation:portrait) {
-                .mainContent{
-                    flex-direction: row-reverse;
-                }
-                .fretboard{
-                    flex-direction: row-reverse;
-                    flex: 0 1 300px;
-                    overflow-y: scroll;
-                }
-                .string{
-                    flex-direction: column;
-                    background-image: linear-gradient(90deg, transparent 45%, #CCC 50%, transparent 55%);
-                }
-                .string:first-child{
-                    order: 2;
-                }
-                .expanded .string{
-                    height: 1000px;
-                }
-                .note{
-                    border-right: 0px none;
-                    border-bottom: 2px solid silver;
-
-                }
-                .note:first-child{
-                    border-bottom: 5px solid silver;
-                }
-                .note:last-child{
-                    border-bottom-width: 0;
-                }
-                .string:first-of-type .note::after{
-                    left:100%;
-                    top: 0;
-                    bottom: 0;
-                    width: 600%;
-                }
-                .ansBtnBox{
-                    flex-direction: column;
-                }
-                .ansBtns{
-                    flex-direction: row;
-                }
-                .ansBtns>div{
-                    flex-direction: column;
-                }
-                .ansBtnLabel span::after{
-                    content:" ";
-                    display: inline-block;
-                }
-               
-            }
-
-
-            .fretboard{
-                display:flex;
-                background-color: #876;
-            }
-            .string{
-                display: flex;
-            }
-            .string:first-child, .note:first-child{
-                background-image:none;
-                background-color:white;
-
-            }
-
-
-            .string:first-child .note{
-                border-color: white;
-            }
-            .note{
-                display: inline-block;
-                position:relative;
-
-            }
-            .note:first-child{
-                flex-basis: 35px;
-            }
-            .noteName{
-                position: absolute;
-                top: 50%;
-                left: 50%;
-                transform: translateX(-50%) translateY(-50%);
-            }
-
-            .string:first-of-type .note::after{
-                position: absolute;
-                background-position: center;
-                background-repeat: no-repeat;
-            }
-            .string:first-of-type .note:nth-of-type(4)::after, 
-            .string:first-of-type .note:nth-of-type(6)::after, 
-            .string:first-of-type .note:nth-of-type(8)::after, 
-            .string:first-of-type .note:nth-of-type(10)::after,
-            .string:first-of-type .note:nth-of-type(16)::after,
-            .string:first-of-type .note:nth-of-type(18)::after{
-                content: "";
-                background-image: url("svg/single.svg");
-
-            }
-            .string:first-of-type .note:nth-of-type(13)::after{
-                content: "";
-                background-image: url("svg/singleDouble.svg");
-            }
-
-
-            .ansBtnBox{
-                flex: 1 1 100px;
-                display: flex;
-                background-color: #AAF
-            }
-            .ansBtns{
-                flex: 0 1 500px;
-                display: flex;
-            }
-            .ansBtns>div{
-                flex: 1 0 auto;
-                display: flex;
-            }
-            .answerBtn{
-                flex: 2 0 auto;
-                border: 1px solid black;
-                border-radius: 5px;
-                position: relative;
-                margin: 3px;
-            }
-            .ansBtnSpacer{
-                flex: 1 0 0;
-            }
-            .ansBtnLabel{
-                position: absolute;
-                top: 50%;
-                left: 50%;
-                transform: translateX(-50%) translateY(-50%);
-            }
-            .filler{
-                flex: 1 0 0;
-                background-color: #AFA
-            }
-           
-            .string, .string *, .ansBtns, .ansBtns *{
-                -webkit-touch-callout: none;
-                -webkit-user-select: none;
-                -khtml-user-select: none;
-                -moz-user-select: none;
-                -ms-user-select: none;
-                user-select: none;
-            }
-            .questionDiv .questionIdentifier:after{
-                content:"";
-                position: absolute;
-                left:0;
-                right: 0;
-                top: 0;
-                bottom: 0;
-                background-position: right;
-                z-index:4;
-                background-image: url("svg/question.svg");
-                background-repeat:no-repeat;
-            }
-            .note.setup .noteName{
-                visibility: visible;
-
-            }
-            .string .note.available{
-                background-color: #BBA;/*rgba(0,0,0,0.075);*/
-            }
-            .string .note.available.playing{
-                background-color:rgba(0,0,0,0);
-            }
-            .string .note.available.playing:first-child{
-                background-color:white;
-            }
-            #scoreDisplayOverlay{
-                position: absolute;
-                left: 0;
-                top: 0;
-                right: 0;
-                bottom: 0;
-                display: none;
-                z-index: 50;
-            }
-            #scoreDisplayOverlayInner{
-                position: absolute;
-                top: 50%;
-                left: 50%;
-                transform: translateX(-50%) translateY(-50%);
-                background-color: white;
-                border: 1px solid black;
-                border-radius: 5px;
-                padding: 15px;
-
-            }
-            #scoreDisplay>div{
-                margin: 10px;
-            }
-            [data-tuningForString].error{
-                outline: 2px solid red;
-            }
-
-            
-            
-            .toggleControlContainer{
-                display: flex;
-                flex-direction: row;
-                flex: 2 0 auto;
-            }
-            #toggleControls{
-                overflow-y: scroll;
-                flex: 0 1 200px;
-                padding: 5px 0px 0px 5px;
-            }
-            #toggleControls ul {
-                list-style-type: none;
-                padding: 0px;
-                margin: 0px;
-            }
-            #toggleControls h1{
-                font-size: medium;
-                padding: 0;
-                margin:0;
-            }
-            #toggleControls h1:before{
-                font-family: monospace;
-                content: "\25b6";
-            }
-            #toggleControls h1.expanded:before {
-                content: "\25bc";
-            }
-            #toggleControls h1 + ul{
-                display: none;
-            }
-            #toggleControls h1.expanded + ul{
-                display: block;
-            }
-            .toggleDiv{
-                display: flex;
-            }
-            .toggleTitle {
-                flex: 1 0 auto;
-                padding-right: 10px;
-            }
-            .addBtn, .removeBtn {
-                width: 25px;
-            }
-            input[data-tuningforstring] {
-                width: 50px;
-            }
-            .tuningDiv button{
-                float: right;
-            }
-            #toggleControls ul ul{
-                padding-left: 5px;
-            }
+			#toggleControls{
+				display: none;
+			}
+			.setupMode #toggleControls{
+				display: block;
+			}
+			
+			.answerControls{
+				display: none;
+			}
+			.playMode.fromFret .answerControls{
+				display: flex;
+			}
+			.toFretQuestion{
+				display: none;
+				position: relative;
+				width: 30px;
+				height: 30px;
+				line-height: 30px;
+				text-align: center;
+				flex: 0 0 auto;
+			}
+			.listenerCanvas{
+				display:none;
+				vertical-align: bottom;
+				border: 1px solid black;
+			}
+			.playMode.toFret .toFretQuestion, .playMode.toFret .listenerCanvas{
+				display: inline-block;
+			}
+			.setupMode .setupBtn{
+				display: none;
+			}
+			.playMode .playBtn{
+				display: none;
+			}
+			.topControls.currentScoreDisp{
+				display: none;
+			}
+			.playMode .topControls.currentScoreDisp{
+				display: inline-block;
+			}
+			
+			.playMode .gameTypeControls{
+				display: none;
+			}
+			.setupToggleExpand{
+				display: inline-block;
+				width: 30px;
+				height: 30px;
+			}
+			.playMode.fromFret .setupToggleExpand{
+					display: none;
+			}
+			
+			
+			
+			#time{
+				display: inline-block;
+				width: 50px;
+				border: 1px solid black;
+				text-align: center;
+			}
+			.currentScoreDisp, .highScoreDisp{
+				width: 35px;
+				text-align: center;
+				text-decoration: underline;
+			}
+.highScoreDisp{
+float:right;
+}
         </style>
-
+        
     </head>
 
-    <body>
-        <div class="overContainer">
+    <body >
+        <div class="overContainer setupMode fromFret">
             <div class="topBar">
-                <div id="modeControls" class="topControls"></div><div id="time" class="topControls"></div><div class='topControls'> High Score: <span class="highScore"></span></div><div class="currentScoreDisp topControls">Current Score: <span class='currentScore'></span></div>
+                <div id="modeControls" class="topControls"></div>
+                <div id="time" class="topControls"></div>
+                <div class="currentScoreDisp topControls"><span class='currentScore'></span></div>
+                <div class='topControls highScoreDisp'><span class="highScore"></span></div>
+                <div class="topControls gameTypeControls">
+					<label><input type="radio" name="gameType" value="fromFret"  checked="true"/>From Fret</label>
+					<label><input type="radio" name="gameType" value="toFret"/>To Fret</label>
+					<label class="useGuitar"><input type="checkbox" >Use Guitar</label>
+					
+				</div>
             </div>
             <div class="mainContent">
                 <div class="fretboard"></div>
-                <div class="ansBtnBox answerControls"><div class="filler"></div>
+                <div class="ansBtnBox answerControls">
+					<div class="filler"></div>
                     <div class="ansBtns">
+						
                         <div class="naturals">
                             <div class="answerBtn" data-noteBtn="C">
                                 <div class="ansBtnLabel">C</div>
@@ -495,10 +369,10 @@ and open the template in the editor.
                             </div>
                         </div>
                         <div class="accidentals">
-                            <div class="ansBtnSpacer"></div>
-                            <div class="answerBtn" data-noteBtn="C#"><div class="ansBtnLabel">C#<span></span>Bb</div></div>
+                            <div class="ansBtnSpacer toggleExpand"></div>
+                            <div class="answerBtn" data-noteBtn="C#"><div class="ansBtnLabel">C#<span></span>Db</div></div>
                             <div class="answerBtn" data-noteBtn="D#"><div class="ansBtnLabel">D#<span></span>Eb</div></div>
-                            <div id="toggle" class="answerBtn" style="border: 0 none"></div>
+                            <div class="answerBtn" style="border: 0 none"></div>
                             <div class="answerBtn" data-noteBtn="F#"><div class="ansBtnLabel">F#<span></span>Gb</div></div>
                             <div class="answerBtn"  data-noteBtn="G#"><div class="ansBtnLabel">G#<span></span>Ab</div></div>
                             <div class="answerBtn" data-noteBtn="A#"> <div class="ansBtnLabel">A#<span></span>Bb</div></div>
@@ -510,10 +384,12 @@ and open the template in the editor.
                 </div>
                 <div class="filler answerControls">
                 </div>
-                <div class="toggleControlContainer">
-                    <div id="toggleControls"></div>
-                    <div class="filler"></div>
-                </div>
+               <!-- <div class="setupToggleExpand toggleExpand"></div> -->
+                <div id="toggleControls"></div>
+				<div>
+					<span class="toFretQuestion questionDiv">F </span>
+					<canvas class="listenerCanvas" style="height:30px; width: 10px;" height="30" width="10"></canvas>
+				</div>
         </div>
         <div id="scoreDisplayOverlay">
             <div id="scoreDisplayOverlayInner">

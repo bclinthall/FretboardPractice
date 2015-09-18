@@ -18,13 +18,12 @@ function PitchListener(onListen, onPermissionDenied, smoothing) {
     var samplesPerHalfWave;
     var samplesToGet;
     var lastSampleToCheck;
-    var smoothCor;
-    var smoothVol;
-    var avgVol=0;
+    var smooth;
     var micNode;
     var analyser;
     var listening = false;
     var audioStream;
+    var note;
     var frequency;
     smoothing = smoothing || 10;
     var numeric = new RegExp(/^[\d\.]+$/);
@@ -51,32 +50,35 @@ function PitchListener(onListen, onPermissionDenied, smoothing) {
         var ary = [];
         var average = function() {
             var tot = 0;
-            var l = ary.length;
+            var l = ary.length
             for (var i = 0; i < l; i++) {
                 tot += ary[i];
             }
             return tot / l;
         };
         var smooth = function(val) {
-            ary.push(val);
-            if(ary.length>size){
-                ary.shift();
-            }
-            return average();
+			if(val==="reset"){
+				ary = []
+			}else if(val==="current"){
+				return average();
+			}else{
+				ary.push(val);
+				if(ary.length>size){
+					ary.shift();
+				}
+				return average();
+			}
         };
         return smooth;
     };
-    smoothCor = new Smoother(smoothing);
-    smoothVol = new Smoother(1000);
-    var listenFor = function(note) {
-        console.log(note);
-        if (isNumeric(note)) {
-            note = parseFloat(note);
+    smooth = new Smoother(smoothing);
+    var listenFor = function(newNote) {
+        if (isNumeric(newNote)) {
+            frequency = parseFloat(newNote);
         }else{
-            note = noteToFrequency(note);
+            note = newNote;
+            frequency = noteToFrequency(note);
         }
-        console.log(note);
-        frequency = note;
         
         samplesPerWave = sampleRate / frequency;
         samplesPerHalfWave = samplesPerWave / 2;
@@ -93,10 +95,9 @@ function PitchListener(onListen, onPermissionDenied, smoothing) {
         samplesPerHalfWave = Math.floor(samplesPerHalfWave);
         samplesToGet = samplesPerWave * wholeWaves;
         lastSampleToCheck = samplesToGet - samplesPerWave;
+        smooth("reset");
         //we want an fft size that lets between eight and sixteen whole waves be represented;
-        console.log("wholeWaves: ", wholeWaves, "\nfftSize", fftSize)
     };
-    var count = 0;
     function getCorrelation(array) {
         var correlation = 0;
         var volume = 0;
@@ -121,36 +122,52 @@ function PitchListener(onListen, onPermissionDenied, smoothing) {
             volume += Math.abs(iVal);
         }
         
-        var a0 = volume/correlation;
-        var a1 = volume/correlationOctaveUp;
-        var a = a0 - a1;
         
-        var b0 = correlation / lastSampleToCheck;
-        var b1 = correlationOctaveUp / lastSampleToCheck;
-        var b = b1-b0;
-        count++;
-        avgVol = (avgVol * (count-1) + volume/lastSampleToCheck ) / count;
-        if(count%10 ===0 ) console.log(avgVol)
+        correlation = volume/correlation;
+        correlationOctaveUp = volume/correlationOctaveUp;
         
-        var c0 = (volume-avgVol)/correlation;
-        var c1 = (volume-avgVol)/correlationOctaveUp;
-        var c = c0-c1;
-        
-        var d0 = (volume-avgVol)/(correlation - avgVol);
-        var d1 = (volume-avgVol)/(correlationOctaveUp-avgVol);
-        var d = d0-d1;
-        
-        
-        return {a: a, b: b, c: c, d: d};
+       
+        //a return value of 5 means that you are probably hearing 
+        //the note you are looking for.
+        return correlation - correlationOctaveUp;
 
     }
+    var smoothTarget = new Smoother(5);
+    var baseTarget = 2.5;
+    var target = baseTarget;
+    smoothTarget(target);
+    var checkTarget = function(lastCor){
+		var score = lastCor/target;
+		if(lastCor > target){
+			if(lastCor>baseTarget){
+				target = smoothTarget((lastCor + baseTarget) /2 );
+			}else{
+				target = smoothTarget(lastCor * 0.67);
+			}
+		}else{
+			if(target>baseTarget * 1.01){
+				target = (target*49 + baseTarget)/50;
+			}else{
+				target *= .999;
+			}
+		}
+		return score;
+	}
     var listen = function() {
         if (listening) {
             var array = new Float32Array(samplesToGet);
             analyser.getFloatTimeDomainData(array);
             var cor = getCorrelation(array);
-            //cor = smooth(cor);
-            onListen(cor);
+            cor = smooth(cor);
+            
+            onListen({
+				cor: cor, 
+				note: note, 
+				frequency: frequency,
+				score: checkTarget(cor),
+				target: target
+			 });
+            //console.log(cor, frequency);
             requestAnimationFrame(listen);
         }
     };

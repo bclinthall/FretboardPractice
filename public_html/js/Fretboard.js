@@ -1,11 +1,11 @@
 function Fretboard(fretboardDiv, toggleControlsDiv, gameControlsDiv) {
     var modeControlsDiv = $("#modeControls");
     var gameControlsDiv = gameControlsDiv ? $(gameControlsDiv) : $("#gameControls")
-
+	var pitchListener;
+	
     var noteNames = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
     var tuning = ["E2", "A2", "D3", "G3", "B3", "E4"]
     tuning.reverse();
-    var gameType = "fromFret";
     var midi = [];
     for (var i = 0; i < 8; i++) {
         for (var j = 0; j < noteNames.length; j++) {
@@ -18,7 +18,7 @@ function Fretboard(fretboardDiv, toggleControlsDiv, gameControlsDiv) {
     }
     function getGameKey() {
         var obj = {
-            gameType: gameType,
+            gameType: $("input[name=gameType]:checked").val(),
             tuning: tuning,
             available: getAvailable()
         }
@@ -34,22 +34,45 @@ function Fretboard(fretboardDiv, toggleControlsDiv, gameControlsDiv) {
         $(".highScore").text(getHighScore());
     }
 
-    function Game() {
-        var available = getAvailable();
+    function Game(available) {
         if (available.length < 2) {
-            alert("You must select more than one fret to play.")
             modeControls.setupMode();
+            alert("You must select more than one fret to play.")
             return;
         }
         var startTime = Date.now();
         var timerId;
-        var timeRemaining = 10;
+        var timeRemaining = 30;
         var correctAnswer;
         var currentScore = 0;
         var positionId;
-        function getTime() {
-            return timeRemaining - Math.floor((Date.now() - startTime) / 1000);
-        }
+        var useGuitar = $(".overContainer").hasClass("useGuitar");
+		if(useGuitar){
+			var canvas = $(".listenerCanvas")[0];
+			var ctx = canvas.getContext("2d");
+			window.ctx = ctx;
+			var w = canvas.width;
+			var h = canvas.height;
+			var onListen = function(result){
+				if(result.score>1){
+					ctx.fillStyle="#0F0";
+				}else{
+					ctx.fillStyle="#000";
+				}
+				ctx.clearRect(0,0,w,h);
+				ctx.fillRect(0,h-(result.score*h) ,w, result.score*h);
+				result.correctAnswer = correctAnswer;
+				console.log(result)
+				if(result.score>1 && correctAnswer === result.note){
+					registerCorrect($(".questionDiv"));
+				}	
+			}
+			var onErr = function(err){console.log(err)};
+			pitchListener = new PitchListener(onListen, onErr, 5);
+			pitchListener.startListening();
+		}
+        
+        
         function overlay(divs) {
             var overlays = $();
             divs.each(function(index, item) {
@@ -67,9 +90,7 @@ function Fretboard(fretboardDiv, toggleControlsDiv, gameControlsDiv) {
             })
             return overlays;
         }
-        function correctAnswer(div) {
-
-        }
+        
         var time = 150;
         function showScore() {
             $(".currentScore").text(currentScore);
@@ -89,60 +110,88 @@ function Fretboard(fretboardDiv, toggleControlsDiv, gameControlsDiv) {
             currentScore--;
             showScore()
         }
-        function registerCorrect(div) {
-            var divOverlay = overlay(div);
-            divOverlay.hide();
-            divOverlay.css({"background-color": "green", "border-radius": "5px"})
-            divOverlay
-                    .fadeIn({duration: time, queue: true})
-                    .fadeOut({duration: time, queue: true, complete: function() {
-                            divOverlay.remove();
-                            newQuestion();
-                        }})
-            currentScore++;
-            showScore()
+        var gotAnswer = false;
+        function registerCorrect(div, log) {
+			if(!gotAnswer){
+				gotAnswer = true;
+				console.log(log);
+				var divOverlay = overlay(div);
+				divOverlay.hide();
+				divOverlay.css({"background-color": "green", "border-radius": "5px"});
+				var count = divOverlay.length;
+				divOverlay
+						.fadeIn({duration: time, queue: true})
+						.fadeOut({duration: time, queue: true, complete: function() {
+								$(this).remove();
+								if( -- count === 0 ){
+									newQuestion();
+									gotAnswer = false;
+								}
+							}})
+				currentScore++;
+				showScore()
+			}
         }
         function registerGuess(guess) {
-            var div = $(".questionDiv");
-            //registerCorrect(div);
-            //////////////=========================================================
-            //return;
+			var div = $(".questionDiv");
             if (guess === correctAnswer) {
-                console.log(correctAnswer, guess);
                 registerCorrect(div);
             } else {
-                console.log(correctAnswer, guess);
                 registerIncorrect(div);
             }
         }
         function scrollTo(div) {
             var div = div[0];
             var rect = div.getBoundingClientRect();
-            var winWidth = $("#fretboard").width();
-            console.log(div)
+            var winWidth = $("body").width();
+            var winHeight = $("body").height();
             if (rect.x < 0 || rect.x + rect.width > winWidth) {
-                var scrollLeft = $("#fretboard").scrollLeft();
-                $("#fretboard").animate({scrollLeft: scrollLeft + rect.x - 25}, 200);
+                var scrollLeft = $(".fretboard").scrollLeft();
+                $(".fretboard").animate({scrollLeft: scrollLeft + rect.x - 25}, 200);
             }
+            if(rect.y < 0 || rect.y + rect.height > winHeight){
+				var scrollTop = $(".fretboard").scrollTop();
+				
+				$(".fretboard").animate({scrollTop: scrollTop + rect.y - 25}, 200);
+			}
         }
         function newQuestion() {
-            var newPos = randInAry(available);
-            while (newPos === positionId) {
-                newPos = randInAry(available);
-            }
-            positionId = newPos;
-            var positionDiv = $("[data-id=" + positionId + "]");
-            correctAnswer = positionDiv.attr("data-shortnote");
-            $(".questionDiv").removeClass("questionDiv");
-            positionDiv.addClass("questionDiv");
-            scrollTo(positionDiv);
-            console.log(positionDiv, positionDiv.offset());
+			if($(".overContainer").hasClass("fromFret")){
+		
+				var newPos = randInAry(available);
+				while (newPos === positionId) {
+					newPos = randInAry(available);
+				}
+				positionId = newPos;
+				var positionDiv = $("[data-id=" + positionId + "]");
+				correctAnswer = positionDiv.attr("data-shortnote");
+				$(".note.questionDiv").removeClass("questionDiv");
+				positionDiv.addClass("questionDiv");
+				scrollTo(positionDiv);
+			}else{
+				var newNote = randInAry(available);
+				while (newNote == correctAnswer) {
+					newNote = randInAry(available);
+				}
+				correctAnswer = newNote;
+				$(".toFretQuestion").text(newNote);
+				if(pitchListener){
+					pitchListener.listenFor(newNote);
+				}
+			}
         }
         newQuestion();
+        function getTime() {
+            return timeRemaining - Math.floor((Date.now() - startTime) / 1000);
+        }
+        var prevTime = false;
         function showTime() {
-            var time = getTime();
-            $("#time").text("Time Remaining: " + getTime());
-            timerId = setTimeout(showTime, 20);
+			var time = getTime();
+            if(time!==prevTime){
+				$("#time").text(time);
+				prevTime = time;
+			}
+			timerId = setTimeout(showTime, 250);
             if (time <= 0) {
                 quit();
             }
@@ -160,9 +209,14 @@ function Fretboard(fretboardDiv, toggleControlsDiv, gameControlsDiv) {
             }
             game = null;
             $("#scoreDisplayOverlay").show();
+            if(pitchListener) {
+				pitchListener.stopListening();
+				pitchListener = null;
+			}
 
         }
-        return {registerGuess: registerGuess, quit: quit}
+        
+        return {registerGuess: registerGuess, registerCorrect: registerCorrect, quit: quit};
 
     }
     function makeFretboard(tuning) {
@@ -194,7 +248,6 @@ function Fretboard(fretboardDiv, toggleControlsDiv, gameControlsDiv) {
             }
             var string = $("<div>")
                     .addClass("string")
-                    .css({"flex-grow": 1})
                     .appendTo(fretboardDiv);
             if (stringNum !== 0) {
                 string.attr("data-string", stringNum + " " + startNote);
@@ -239,7 +292,7 @@ function Fretboard(fretboardDiv, toggleControlsDiv, gameControlsDiv) {
             makeString(fretboardDiv, tuning, fretLengths, i);
         }
     }
-    function makeFretboard2(tuning) {
+/*    function makeFretboard2(tuning) {
         fretboardDiv.empty();
         var scaleLength = 50 * 30;
 
@@ -295,8 +348,8 @@ function Fretboard(fretboardDiv, toggleControlsDiv, gameControlsDiv) {
             }
         }
         $(".note").addClass("available");
-    }
-    fretboardDiv.on("click", ".note.setup", function(e) {
+    }*/
+    $("body").on("click", ".setupMode .note", function(e) {
         $(this).toggleClass("available");
         showHighScore();
     })
@@ -307,32 +360,18 @@ function Fretboard(fretboardDiv, toggleControlsDiv, gameControlsDiv) {
             modeControls.setupMode();
         })
         function setupMode() {
-            $(".currentScore").text("0");
-            $(".currentScoreDisp").hide();
+			$(".overContainer").removeClass("playMode").addClass("setupMode");
+			$(".currentScore").text("0");
             $("#time").hide();
             showHighScore();
-            fretboardDiv.find(".note").addClass("setup");
-            gameControlsDiv.hide();
-            toggleControlsDiv.show();
-            $(".setupBtn").hide();
-            $(".playBtn").show();
-            $(".questionDiv").removeClass("questionDiv");
-            $(".playing").removeClass("playing");
+            $(".note.questionDiv").removeClass("questionDiv");
             if (game)
                 game.quit();
         }
         function playMode() {
-            fretboardDiv.find(".note").removeClass("setup");
-            $(".currentScoreDisp").show();
-            $("#time").show();
-
-            toggleControlsDiv.hide();
-            gameControlsDiv.show();
-            $(".playBtn").hide();
-            $(".setupBtn").show();
-            $(".available").addClass("playing")
-            console.log(getAvailable());
-            game = new Game(getAvailable());
+			$(".overContainer").addClass("playMode").removeClass("setupMode");
+			$("#time").show();
+			game = new Game(getAvailable());
         }
         ;
         $("<button>").text("Quit").addClass("setupBtn").appendTo(modeControlsDiv).click(setupMode);
@@ -363,10 +402,10 @@ function Fretboard(fretboardDiv, toggleControlsDiv, gameControlsDiv) {
                 $("<button>").text("+").addClass("addBtn").attr("data-selector", selector).appendTo(btnTd);
                 $("<button>").text("-").addClass("removeBtn").attr("data-selector", selector).appendTo(btnTd);
             }
-
+			$("<div>").text("Select the finger positions you wish to practice by clicking the fretboard or using the controls below.").appendTo(toggleControlsDiv);
             var catDiv = makeControlCatDiv("General", "toggleCatDiv", toggleControlsDiv);
 //                    $(catSel).addClass("toggleCatDiv").appendTo(toggleControlsDiv);
-            addToggle("all", "", catDiv);
+            addToggle("all", "[data-fret]", catDiv);
             addToggle("naturals", "[data-accidental=false]", catDiv);
             addToggle("sharps and flats", "[data-accidental=true]", catDiv);
 
@@ -417,7 +456,6 @@ function Fretboard(fretboardDiv, toggleControlsDiv, gameControlsDiv) {
                 tuning = ["E2", "A2", "D3", "G3", "B3", "E4"].reverse();
                 fillTuningVals();
                 makeFretboard(tuning);
-                fretboardDiv.find(".note").addClass("setup");
                 $("[data-tuningforstring]").removeClass("error");
             })
             makeTuningDiv(catDiv, 1);
@@ -435,7 +473,6 @@ function Fretboard(fretboardDiv, toggleControlsDiv, gameControlsDiv) {
                     var strIndex = parseInt($(this).attr("data-tuningforstring"));
                     tuning[strIndex] = val;
                     makeFretboard(tuning);
-                    fretboardDiv.find(".note").addClass("setup");
                     $(this).removeClass("error");
                     fillTuningVals();
                 }
@@ -451,45 +488,47 @@ function Fretboard(fretboardDiv, toggleControlsDiv, gameControlsDiv) {
                     fretboardDiv.find(".note").addClass("hideFretNums")
                 }
             })
-            var stringNumDiv = $("<div>").appendTo(catDiv);
-            var stringNumLabel = $("<label>").html("<span class='toggleTitle'>Show String Identifiers</span>").appendTo(stringNumDiv);
-            $("<input>").prop("checked", true).attr({type: "checkbox"}).appendTo(stringNumLabel).change(function() {
-                if ($(this).prop("checked")) {
-                    fretboardDiv.find(".string").removeClass("hideStringIdentifiers")
-                } else {
-                    fretboardDiv.find(".string").addClass("hideStringIdentifiers")
-                }
-            })
-
         }
     }
     makeOtherControls();
     function makeGameControls() {
-        if (gameControlsDiv && gameControlsDiv.find("answerBtn").length === 0) {
+        if (gameControlsDiv && gameControlsDiv.find(".answerBtn").length === 0) {
             for (var i = 0; i < noteNames.length; i++) {
                 var noteName = noteNames[i];
                 $("<button>").text(noteName).addClass("answerBtn").attr("data-noteBtn", noteName).appendTo(gameControlsDiv);
             }
         }
-        $("body").on("click", ".answerBtn", function() {
+        $("body").on("mouseup", ".fromFret.playMode .answerBtn", function() {
             var noteName = $(this).attr("data-noteBtn");
             if (game) {
-                game.registerGuess(noteName, $(this));
+                game.registerGuess(noteName);
+            }
+        })
+        $("body").on("mouseup", ".toFret.playMode .note.available", function(event) {
+			
+			event.stopPropagation();
+            var noteName = $(this).attr("data-notename");
+            $(".note.questionDiv").removeClass("questionDiv");
+            $(this).addClass("questionDiv");
+            if (game) {
+                game.registerGuess(noteName);
             }
         })
         var mod = "";
         $("body").on("keydown", function(e) {
-            if (e.which === 188) {
-                mod = "b";
-            } else if (e.which === 190) {
-                mod = "#";
-            } else {
-                var char = String.fromCharCode(e.keyCode)
-                if (game && "ABCDEFG".indexOf(char) > -1) {
-                    game.registerGuess(char + mod);
-                }
+			if($(".overContainer").is(".playMode.fromFret")){
+				if (e.which === 188) {
+					mod = "b";
+				} else if (e.which === 190) {
+					mod = "#";
+				} else {
+					var char = String.fromCharCode(e.keyCode)
+					if (game && "ABCDEFG".indexOf(char) > -1 && $(".overContainer").hasClass("playMode") &&   $(".overContainer").hasClass("fromFret")) {
+						game.registerGuess(char + mod);
+					}
 
-            }
+				}
+			}
         })
         $("body").on("keyup", function(e) {
             if (e.which === 188 || e.which === 190) {
@@ -498,13 +537,37 @@ function Fretboard(fretboardDiv, toggleControlsDiv, gameControlsDiv) {
         })
     }
     makeGameControls();
-
+	function makeListenerControls(){
+		$(".useGuitar input[type=checkbox]").change(function(){
+			var useGuitar = $(this).prop("checked");
+			if(useGuitar){
+				$(".overContainer").addClass("useGuitar");
+			}else{
+				$(".overContainer").removeClass("useGuitar");
+			}
+		})
+	}
+	makeListenerControls();
 
     function getAvailable() {
         var available = [];
-        $(".available").each(function(index, item) {
-            available.push($(item).attr("data-id"));
-        })
+        if($(".overContainer").hasClass("fromFret")){
+			$(".available").each(function(index, item) {
+				available.push($(item).attr("data-id"));
+			})
+		}else{
+			$(".available").each(function(index, item) {
+				var note = $(item).attr("data-noteName");
+				if(available.indexOf(note === -1)){
+					available.push(note);
+				}
+				/*
+				var shortNote = $(item).attr("data-shortnote");
+				if(available.indexOf(shortNote === -1)){
+					available.push(shortNote);
+				}*/
+			})
+		}
         return available;
     }
 
