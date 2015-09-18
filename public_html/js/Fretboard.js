@@ -122,7 +122,7 @@ function Fretboard(fretboardDiv, toggleControlsDiv, gameControlsDiv) {
             console.log(div)
             if (rect.x < 0 || rect.x + rect.width > winWidth) {
                 var scrollLeft = $("#fretboard").scrollLeft();
-                $("#fretboard").animate({scrollLeft: scrollLeft + rect.x - 25},200);
+                $("#fretboard").animate({scrollLeft: scrollLeft + rect.x - 25}, 200);
             }
         }
         function newQuestion() {
@@ -165,80 +165,80 @@ function Fretboard(fretboardDiv, toggleControlsDiv, gameControlsDiv) {
         return {registerGuess: registerGuess, quit: quit}
 
     }
-        function makeFretboard(tuning) {
-                fretboardDiv.empty();
-        
-                function makeFretLengthArray() {
-                    var ary = [0];
-                    function d(n) {
-                        return Math.pow(.5, (n / 12));
-                    }
-                    function width(n, divisor) {
-                        divisor = divisor ? divisor : 1;
-                        return (d(n - 1) - d(n)) / divisor;
-                    }
-                    for (var i = 0; i < 18; i++) {
-                        ary.push(width(i, 1 / 100))
-                    }
-                    ary.push(4);
-                    return ary;
-                }
-                function makeString(fretboardDiv, tuning, fretLengths, i){
-                    var stringNum = 0;
-                    var startNote = 0;
-                    var startIndex = 0;
-                    if(i>0){
-                        stringNum = i;
-                        startNote = tuning[stringNum-1];
-                        startIndex = midi.indexOf(startNote);
-                    }
-                    var string = $("<div>")
-                            .addClass("string")
-                            .css({"flex-grow": 1})
-                            .appendTo(fretboardDiv);
-                    if(stringNum !==0){
-                        string.attr("data-string", stringNum + " " + startNote);
-                    }
-                    for (var j = 0; j < fretLengths.length; j++) {
-                        makeNote(string, startIndex, fretLengths, stringNum, j);
-                    }   
-                }
-                function makeNote(string, startIndex, fretLengths, stringNum, fret){
-                                var note = $("<div>")
-                                .addClass("note")
-                                .css({"flex-grow": fretLengths[fret]})
-                                .appendTo(string);
-                        var noteNameDiv = $("<div>")
-                                .addClass("noteName")
-                                .text(fret)
-                                .appendTo(note);
-                        if(stringNum !== 0 && fret<19){
-                            var i = stringNum - 1;
-                            var noteName = midi[startIndex + fret];
-                            var accidental = noteName.length === 3;
-                            var octave = noteName[noteName.length - 1];
-                            var shortNote = noteName.substr(0, noteName.length - 1);
-                            note.attr({
-                                "data-id": i + "_" + fret,
-                                "data-fret": fret,
-                                "data-ocatave": octave,
-                                "data-shortNote": shortNote,
-                                "data-noteName": noteName,
-                                "data-accidental": accidental,
-                                "data-stringNum": stringNum
-                            });
-                            noteNameDiv.text(noteName)
-                            $("<div>").addClass("questionIdentifier").appendTo(note);
-                        }
-                        if(fret === 19){
-                            noteNameDiv.text("");
-                        }
-                }
-                var fretLengths = makeFretLengthArray();
-                for (var i = 0; i < 7; i++) {
-                    makeString(fretboardDiv, tuning, fretLengths, i);
-                }
+    function makeFretboard(tuning) {
+        fretboardDiv.empty();
+
+        function makeFretLengthArray() {
+            var ary = [0];
+            function d(n) {
+                return Math.pow(.5, (n / 12));
             }
+            function width(n, divisor) {
+                divisor = divisor ? divisor : 1;
+                return (d(n - 1) - d(n)) / divisor;
+            }
+            for (var i = 0; i < 18; i++) {
+                ary.push(width(i, 1 / 100))
+            }
+            ary.push(4);
+            return ary;
+        }
+        function makeString(fretboardDiv, tuning, fretLengths, i) {
+            var stringNum = 0;
+            var startNote = 0;
+            var startIndex = 0;
+            if (i > 0) {
+                stringNum = i;
+                startNote = tuning[stringNum - 1];
+                startIndex = midi.indexOf(startNote);
+            }
+            var string = $("<div>")
+                    .addClass("string")
+                    .css({"flex-grow": 1})
+                    .appendTo(fretboardDiv);
+            if (stringNum !== 0) {
+                string.attr("data-string", stringNum + " " + startNote);
+            }
+            for (var j = 0; j < fretLengths.length; j++) {
+                makeNote(string, startIndex, fretLengths, stringNum, j);
+            }
+        }
+        function makeNote(string, startIndex, fretLengths, stringNum, fret) {
+            var note = $("<div>")
+                    .addClass("note")
+                    .css({"flex-grow": fretLengths[fret]})
+                    .appendTo(string);
+            var noteNameDiv = $("<div>")
+                    .addClass("noteName")
+                    .text(fret)
+                    .appendTo(note);
+            if (stringNum !== 0 && fret < 19) {
+                var i = stringNum - 1;
+                var noteName = midi[startIndex + fret];
+                var accidental = noteName.length === 3;
+                var octave = noteName[noteName.length - 1];
+                var shortNote = noteName.substr(0, noteName.length - 1);
+                note.attr({
+                    "data-id": i + "_" + fret,
+                    "data-fret": fret,
+                    "data-ocatave": octave,
+                    "data-shortNote": shortNote,
+                    "data-noteName": noteName,
+                    "data-accidental": accidental,
+                    "data-stringNum": stringNum
+                });
+                noteNameDiv.text(noteName)
+                $("<div>").addClass("questionIdentifier").appendTo(note);
+            }
+            if (fret === 19) {
+                noteNameDiv.text("");
+            }
+        }
+        var fretLengths = makeFretLengthArray();
+        for (var i = 0; i < 7; i++) {
+            makeString(fretboardDiv, tuning, fretLengths, i);
+        }
+    }
     function makeFretboard2(tuning) {
         fretboardDiv.empty();
         var scaleLength = 50 * 30;
@@ -253,15 +253,15 @@ function Fretboard(fretboardDiv, toggleControlsDiv, gameControlsDiv) {
             divisor = divisor ? divisor : 1;
             if (n === 0)
                 return 50 / divisor;
-            return (d(n) - d(n - 1))/divisor;
+            return (d(n) - d(n - 1)) / divisor;
 
         }
         var totWidth = 75;
-        for (var fret = 0; fret < 18; fret++){
+        for (var fret = 0; fret < 18; fret++) {
             totWidth += width(fret, 1);
         }
         var divisor = totWidth / 300;
-        
+
         for (var i = 0; i < tuning.length; i++) {
             var startNote = tuning[i];
             var startIndex = midi.indexOf(startNote);
@@ -282,7 +282,7 @@ function Fretboard(fretboardDiv, toggleControlsDiv, gameControlsDiv) {
                             "data-noteName": noteName,
                             "data-accidental": accidental,
                             "data-stringNum": stringNum
-                        })              
+                        })
                         //.width(width(fret, 1))
                         .css("flex", width(fret, 1) + " 0 0")
                         .appendTo(stringDiv);
@@ -341,31 +341,46 @@ function Fretboard(fretboardDiv, toggleControlsDiv, gameControlsDiv) {
         setupMode();
         return {setupMode: setupMode, playMode: playMode};
     }
+    function makeControlCatDiv(header, cssClass, parent) {
+        var container = $("<li>").appendTo(parent).addClass(cssClass);
+        $("<h1>").text(header).appendTo(container);
+        return $("<ul>").appendTo(container);
+    }
     function makeToggleControls() {
+        $("body").on("click", "#toggleControls h1", function(){
+            $(this).toggleClass("expanded");
+        })
+        var rowSel = "<li>";
+        var cellSel = "<span>";
         if (toggleControlsDiv && toggleControlsDiv.length > 0) {
-            function addToggle(name, selector, catDiv) {
-                var toggleDiv = $("<tr>").addClass("toggleDiv").appendTo(catDiv);
-                $("<td>").addClass("toggleTitle").text(name).appendTo(toggleDiv);
-                var btnTd = $("<td>").appendTo(toggleDiv);
-                $("<button>").text("add").addClass("addBtn").attr("data-selector", selector).appendTo(btnTd);
-                $("<button>").text("remove").addClass("removeBtn").attr("data-selector", selector).appendTo(btnTd);
+            if (!toggleControlsDiv.is("ul")) {
+                toggleControlsDiv = $("<ul>").appendTo(toggleControlsDiv);
             }
-            var catDiv = $("<table>").addClass("toggleCatDiv").appendTo(toggleControlsDiv);
+            function addToggle(name, selector, catDiv) {
+                var toggleDiv = $(rowSel).addClass("toggleDiv").appendTo(catDiv);
+                $(cellSel).addClass("toggleTitle").html(name).appendTo(toggleDiv);
+                var btnTd = $(cellSel).appendTo(toggleDiv);
+                $("<button>").text("+").addClass("addBtn").attr("data-selector", selector).appendTo(btnTd);
+                $("<button>").text("-").addClass("removeBtn").attr("data-selector", selector).appendTo(btnTd);
+            }
+
+            var catDiv = makeControlCatDiv("General", "toggleCatDiv", toggleControlsDiv);
+//                    $(catSel).addClass("toggleCatDiv").appendTo(toggleControlsDiv);
             addToggle("all", "", catDiv);
             addToggle("naturals", "[data-accidental=false]", catDiv);
             addToggle("sharps and flats", "[data-accidental=true]", catDiv);
 
-            var catDiv = $("<table>").addClass("toggleCatDiv").appendTo(toggleControlsDiv);
+            catDiv = makeControlCatDiv("String", "toggleCatDiv", toggleControlsDiv);//$(catSel).addClass("toggleCatDiv").appendTo(toggleControlsDiv);
             for (var i = 0; i < tuning.length; i++) {
-                var stringName = (i + 1) + ": " + tuning[i];
+                var stringName = (i + 1) + ": <span data-toggleForString='" + (i+1) + "'>" + tuning[i] + "</span>";
                 addToggle(stringName + " String", "[data-stringNum=" + (i + 1) + "]", catDiv);
             }
-            var catDiv = $("<table>").addClass("toggleCatDiv").appendTo(toggleControlsDiv);
+            catDiv = makeControlCatDiv("Notes", "toggleCatDiv", toggleControlsDiv);//$(catSel).addClass("toggleCatDiv").appendTo(toggleControlsDiv);
             for (var i = 0; i < noteNames.length; i++) {
                 var noteName = noteNames[i];
                 addToggle(noteName, "[data-shortNote=" + noteName + "]", catDiv);
             }
-            var catDiv = $("<table>").addClass("toggleCatDiv").appendTo(toggleControlsDiv);
+            catDiv = makeControlCatDiv("Frets", "toggleCatDiv", toggleControlsDiv);//$(catSel).addClass("toggleCatDiv").appendTo(toggleControlsDiv);
             for (var i = 0; i < 18; i++) {
                 addToggle("Fret " + i, "[data-fret=" + i + "]", catDiv);
             }
@@ -385,30 +400,32 @@ function Fretboard(fretboardDiv, toggleControlsDiv, gameControlsDiv) {
     function makeOtherControls() {
         if (toggleControlsDiv && toggleControlsDiv.length > 0) {
             function makeTuningDiv(catDiv, string) {
-                var div = $("<div>").appendTo(catDiv);
-                var label = $("<label>").text("String " + string).appendTo(div)
+                var div = $("<li>").appendTo(catDiv);
+                var label = $("<label>").html("<span class='toggleTitle'>String " + string+"</span>").appendTo(div)
                 $("<input>").attr("data-tuningforstring", string - 1).appendTo(label);
             }
             function fillTuningVals() {
                 for (var i = 0; i < 6; i++) {
                     $("[data-tuningforstring=" + i + "]").val(tuning[i]);
+                    $("[data-toggleforstring=" + (i+1) + "]").text(tuning[i]);
                 }
             }
-            var catDiv = $("<div>").addClass("toggleCatDiv").appendTo(toggleControlsDiv);
-            var title = $("<div>").text("tuning").appendTo(catDiv);
-            $("<button>").text("Standard").appendTo(title).click(function() {
-                tuning = ["E2", "A2", "D3", "G3", "B3", "E4"];
+            var catDiv = makeControlCatDiv("Tuning", "toggleCatDiv tuningDiv", toggleControlsDiv);//$("<div>").addClass("toggleCatDiv").appendTo(toggleControlsDiv);
+            //var title = $("<div>").text("tuning").appendTo(catDiv);
+            $("<button>").text("Standard").appendTo(catDiv.parent().children().first()).click(function(e) {
+                e.stopPropagation();
+                tuning = ["E2", "A2", "D3", "G3", "B3", "E4"].reverse();
                 fillTuningVals();
                 makeFretboard(tuning);
                 fretboardDiv.find(".note").addClass("setup");
                 $("[data-tuningforstring]").removeClass("error");
             })
-            makeTuningDiv(catDiv, 1, "E2");
-            makeTuningDiv(catDiv, 2, "A2");
-            makeTuningDiv(catDiv, 3, "D3");
-            makeTuningDiv(catDiv, 4, "G3");
-            makeTuningDiv(catDiv, 5, "B3");
-            makeTuningDiv(catDiv, 6, "E4");
+            makeTuningDiv(catDiv, 1);
+            makeTuningDiv(catDiv, 2);
+            makeTuningDiv(catDiv, 3);
+            makeTuningDiv(catDiv, 4);
+            makeTuningDiv(catDiv, 5);
+            makeTuningDiv(catDiv, 6);
             fillTuningVals()
             $("body").on("input", "[data-tuningforstring]", function() {
                 var val = $(this).val();
@@ -420,11 +437,13 @@ function Fretboard(fretboardDiv, toggleControlsDiv, gameControlsDiv) {
                     makeFretboard(tuning);
                     fretboardDiv.find(".note").addClass("setup");
                     $(this).removeClass("error");
+                    fillTuningVals();
                 }
 
             });
+            catDiv = makeControlCatDiv("Display", "toggleCatDiv", toggleControlsDiv);//$("<div>").addClass("toggleCatDiv").appendTo(toggleControlsDiv);
             var fretNumDiv = $("<div>").appendTo(catDiv);
-            var fretNumLabel = $("<label>").text("Show Fret Numbers").appendTo(fretNumDiv);
+            var fretNumLabel = $("<label>").html("<span class='toggleTitle'>Show Fret Numbers</span>").appendTo(fretNumDiv);
             $("<input>").prop("checked", true).attr({type: "checkbox"}).appendTo(fretNumLabel).change(function() {
                 if ($(this).prop("checked")) {
                     fretboardDiv.find(".note").removeClass("hideFretNums")
@@ -433,7 +452,7 @@ function Fretboard(fretboardDiv, toggleControlsDiv, gameControlsDiv) {
                 }
             })
             var stringNumDiv = $("<div>").appendTo(catDiv);
-            var stringNumLabel = $("<label>").text("Show String Identifiers").appendTo(stringNumDiv);
+            var stringNumLabel = $("<label>").html("<span class='toggleTitle'>Show String Identifiers</span>").appendTo(stringNumDiv);
             $("<input>").prop("checked", true).attr({type: "checkbox"}).appendTo(stringNumLabel).change(function() {
                 if ($(this).prop("checked")) {
                     fretboardDiv.find(".string").removeClass("hideStringIdentifiers")
@@ -446,7 +465,7 @@ function Fretboard(fretboardDiv, toggleControlsDiv, gameControlsDiv) {
     }
     makeOtherControls();
     function makeGameControls() {
-        if(gameControlsDiv.find("answerBtn").length() ===0){
+        if (gameControlsDiv && gameControlsDiv.find("answerBtn").length === 0) {
             for (var i = 0; i < noteNames.length; i++) {
                 var noteName = noteNames[i];
                 $("<button>").text(noteName).addClass("answerBtn").attr("data-noteBtn", noteName).appendTo(gameControlsDiv);

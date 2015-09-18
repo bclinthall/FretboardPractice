@@ -200,8 +200,8 @@ and open the template in the editor.
                 }
                 .ansBtnLabel span::after{
                     content:"/";
-
                 }
+                
             }
 
             @media all and (orientation:portrait) {
@@ -253,6 +253,7 @@ and open the template in the editor.
                     content:" ";
                     display: inline-block;
                 }
+               
             }
 
 
@@ -342,10 +343,7 @@ and open the template in the editor.
                 flex: 1 0 0;
                 background-color: #AFA
             }
-            #toggleControls{
-                flex: 2 0 200px;
-                overflow-y: scroll;
-            }
+           
             .string, .string *, .ansBtns, .ansBtns *{
                 -webkit-touch-callout: none;
                 -webkit-user-select: none;
@@ -353,13 +351,6 @@ and open the template in the editor.
                 -moz-user-select: none;
                 -ms-user-select: none;
                 user-select: none;
-            }
-
-
-
-
-            [data-tuningForString].error{
-                outline: 2px solid red;
             }
             .questionDiv .questionIdentifier:after{
                 content:"";
@@ -408,6 +399,64 @@ and open the template in the editor.
             }
             #scoreDisplay>div{
                 margin: 10px;
+            }
+            [data-tuningForString].error{
+                outline: 2px solid red;
+            }
+
+            
+            
+            .toggleControlContainer{
+                display: flex;
+                flex-direction: row;
+                flex: 2 0 auto;
+            }
+            #toggleControls{
+                overflow-y: scroll;
+                flex: 0 1 200px;
+                padding: 5px 0px 0px 5px;
+            }
+            #toggleControls ul {
+                list-style-type: none;
+                padding: 0px;
+                margin: 0px;
+            }
+            #toggleControls h1{
+                font-size: medium;
+                padding: 0;
+                margin:0;
+            }
+            #toggleControls h1:before{
+                font-family: monospace;
+                content: "\25b6";
+            }
+            #toggleControls h1.expanded:before {
+                content: "\25bc";
+            }
+            #toggleControls h1 + ul{
+                display: none;
+            }
+            #toggleControls h1.expanded + ul{
+                display: block;
+            }
+            .toggleDiv{
+                display: flex;
+            }
+            .toggleTitle {
+                flex: 1 0 auto;
+                padding-right: 10px;
+            }
+            .addBtn, .removeBtn {
+                width: 25px;
+            }
+            input[data-tuningforstring] {
+                width: 50px;
+            }
+            .tuningDiv button{
+                float: right;
+            }
+            #toggleControls ul ul{
+                padding-left: 5px;
             }
         </style>
 
@@ -461,9 +510,10 @@ and open the template in the editor.
                 </div>
                 <div class="filler answerControls">
                 </div>
-
-                <div id="toggleControls"></div>
-            </div>
+                <div class="toggleControlContainer">
+                    <div id="toggleControls"></div>
+                    <div class="filler"></div>
+                </div>
         </div>
         <div id="scoreDisplayOverlay">
             <div id="scoreDisplayOverlayInner">

@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<!--
+To change this license header, choose License Headers in Project Properties.
+To change this template file, choose Tools | Templates
+and open the template in the editor.
+-->
+<html>
+    <head>
+        <title>TODO supply a title</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <script type="text/javascript" src="js/jquery-2.1.1.min.js"></script>
+        <script type="text/javascript" src="js/PitchListener.js"></script>
+        <script>
+            $(function(){
+                var canvas = $("canvas")[0];
+                var ctx = canvas.getContext("2d");
+                var w = canvas.width;
+                var h = canvas.height;
+                var onListen = function(score){
+                    //console.log(score);
+                    var a = score.a;
+                    var b = Math.pow(score.b*100,3);
+                    var c = score.c;
+                    var d = score.d;
+                    ctx.clearRect(0,0,w,h);
+                    ctx.fillStyle = "red"
+                    ctx.fillRect(0,h-20, w, 1);
+                    ctx.fillStyle = "black"
+                    ctx.fillRect(20, h-(a*20)-20, 20, a*20)
+                    //ctx.fillRect(40, h-(b)-20, 20, b)
+                    //ctx.fillRect(60, h-(c*20)-20, 20, c*20)
+                    //ctx.fillRect(80, h-(d*20)-20, 20, d*20)
+                }
+                var onPermissionDenied = function(err){
+                    console.log(err);
+                    alert(err);
+                }
+                var pitchListener = new PitchListener(onListen, onPermissionDenied, 10, 3);
+                var listening = false;
+                $("#start").click(function(){
+                    if(!listening){
+                        listening = true;
+                        pitchListener.startListening();
+                    }
+                })
+                $("#stop").click(function(){
+                    if(listening){
+                        listening = false;
+                        pitchListener.stopListening();
+                    }
+                })
+                $("#note").change(function(){
+                    pitchListener.listenFor($(this).val());
+                })
+            })
+        </script>
+    </head>
+    <body>
+        <button id="start">Start</button>
+        <button id="stop">Stop</button>
+        <input id="note">
+        <canvas></canvas>
+    </body>
+</html>
+ <!--       <script>
+            $(function() {
+                window.requestAnimationFrame = window.requestAnimationFrame || window.webkitRequestAnimationFrame;
+                var canvas = $("canvas")[0];
+                var canvasContext = canvas.getContext("2d");
+                canvasContext.fillStyle = "#000";
+                var noteInput = $("input.note");
+                var sensitivityInput = $("input.sensitivity");
+                var audioContext = new AudioContext();
+                var sampleRate = audioContext.sampleRate;
+                var bufferSize = 4096;
+                var wholeWaves;
+                var samplesPerWave
+                var paused = $(".paused");
+                var smootherCor;
+                var micNode, filterNode, analyser, filterNode2, analyser2;
+
+                var scaleForMidi = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+                function midiToFrequency(midi) {
+                    var aOffset = midi - 69;
+                    var a = 440;
+                    return a * Math.pow(2, aOffset / 12);
+                }
+                function noteToMidi(note) {
+                    var n = note[0];
+                    var o = parseInt(note.substring(note.length - 1));
+                    var noteIndex = scaleForMidi.indexOf(n);
+                    o++;
+                    return o * 12 + noteIndex;
+                }
+                function noteToFrequency(note) {
+                    return midiToFrequency(noteToMidi(note));
+                }
+
+                var Params = function() {
+                    var currentNote = "E2"
+                    var currentFrequency;
+                    var currentMidi;
+                    var sensitivity = 20;
+                    var getNote = function() {
+                        return currentNote;
+                    }
+                    var getMidi = function(){
+                        return currentMidi;
+                    }
+                    var getFrequency = function() {
+                        return currentFrequency;
+                    }
+                    var setNote = function(newNote) {
+                        currentNote = newNote;
+                        currentMidi = noteToMidi(newNote);
+                        setMidi(currentMidi)
+                    }
+                    var setMidi = function(newMidi){
+                        currentMidi = newMidi;
+                        currentFrequency = midiToFrequency(currentMidi);
+                        samplesPerWave = sampleRate / currentFrequency;
+                        wholeWaves = Math.floor(bufferSize / samplesPerWave) //The wholeWaves business smoothes things out a lot.
+                        
+                        if (filterNode) {
+                            $(".current").text(currentMidi + " " + currentFrequency + " wholeWaves: " + wholeWaves);
+                            filterNode.frequency.setValueAtTime(currentFrequency, 0);
+                            filterNode2.frequency.setValueAtTime(currentFrequency*2, 0);
+                        } else {
+                            setTimeout(function() {
+                                setMidi(newMidi)
+                            }, 1000)
+                        }
+                    }
+                    var getSensitivity = function() {
+                        return sensitivity;
+                    }
+                    var setSensitivity = function(newSensitivity) {
+                        sensitivity = newSensitivity;
+                        
+                    };
+                    return{getNote: getNote,  setNote: setNote, getMidi: getMidi, setMidi: setMidi, getSensitivity: getSensitivity, setSensitivity: setSensitivity, getFrequency: getFrequency}
+                }
+                var params = new Params();
+
+                function gotMic(stream) {
+                    micNode = audioContext.createMediaStreamSource(stream);
+                    filterNode = getFilter();
+                    filterNode2 = getFilter();
+                    analyser = getAnalyser();
+                    analyser2 = getAnalyser();
+                    analyser2.smoothingTimeConstant = 0;
+                    micNode.connect(filterNode);
+                    filterNode.connect(analyser);
+                    micNode.connect(analyser2);
+                    //filterNode2.connect(analyser2);
+                    params.setNote(params.getNote());
+                    params.setSensitivity(params.getSensitivity());
+                    draw();
+                }
+                function getFilter() {
+                    var filter = audioContext.createBiquadFilter();
+                    filter.type = "bandpass";
+                    filter.Q.value = 100;
+                    return filter;
+                }
+                function getAnalyser() {
+                    var analyser = audioContext.createAnalyser();
+                    analyser.fftSize = bufferSize;
+                    return analyser;
+                }
+                var log = {};
+
+
+                function draw() {
+                    var array = new Float32Array(samplesPerWave * wholeWaves);
+                    var array2 = new Float32Array(samplesPerWave * wholeWaves);
+                    analyser.getFloatTimeDomainData(array);
+                    analyser2.getFloatTimeDomainData(array2);
+                    var midi = params.getMidi()
+                    var average = getAverageVolume(array)*1000;
+                    //var average2 = getAverageVolume(array2)*1000;
+                    var logMidi = log[midi];
+                    //var logMidiO = log[midi+"+"];
+                    log[midi] = logMidi ? logMidi > average ? logMidi : average :  average;
+                    //log[midi+"+"] = logMidiO ? logMidiO > average2 ? logMidiO : average2 :  average;
+                    var cor = getCorrelation(array2);
+                    //console.log(cor);
+                    var val = average;
+                    canvasContext.clearRect(0,0, 500,500);
+                    makeBar(val, 0, "#000");
+                    cor = smootherCor.smooth(cor*10)
+                    if(cor>30){
+                        $(".good").show().fadeOut(1000);
+                    }
+                    //console.log(cor)
+                    makeBar(cor-10, 30, "#F00")
+
+                    if (!paused.prop("checked") === true)
+                        window.requestAnimationFrame(draw);
+                }
+                
+                var Smoother = function(size){
+                    var ary = new Array(size);
+                    for(var i=0; i<size; i++){
+                        ary[i] = 0;
+                    }
+                    var average = function(){
+                        var tot = 0;
+                        for(var i=0; i<size; i++){
+                            tot+= ary[i];
+                        }
+                        return tot/size;
+                    }
+                    var smooth = function(val){
+                        ary.push(val);
+                        ary.shift();
+                        return average();
+                    }
+                    return {smooth: smooth};
+                }
+                smootherCor = new Smoother(5);
+                
+                var lowest = noteToMidi("E2")
+                var i = 0;
+                function checkMax(){
+                        var midi = lowest+i;
+                        
+                        params.setMidi(midi);
+                        var frequency = params.getFrequency();
+                        //$(".output").html(midi + " "+ frequency + "<br><br>" + JSON.stringify(log, null, 4));
+                        
+                }
+                $(".next").click(function(){
+                    i++;
+                    checkMax();
+                })
+                function getCorrelation(array){
+                    var samplesPerWave = Math.floor(sampleRate/params.getFrequency());
+                    var last = array.length - samplesPerWave;
+                    var correlation = 0;
+                    var volume = 0;
+                    for(var i = 0; i<last; i++){
+                        correlation += Math.abs(array[i] - array[i+samplesPerWave]);
+                        volume += Math.abs(array[i]);
+                    }
+                    volume /= last;
+                    correlation /= last;
+                    return volume/correlation;
+                    
+                }
+                function getAverageVolume(array) {
+                    var min = 0;
+                    var max = 0;
+                    var values = 0;
+                    var average;
+
+                    var length = array.length;
+
+                    // get all the frequency amplitudes
+                    for (var i = 0; i < length; i++) {
+                        var val = Math.abs(array[i]);
+                        values += val;
+                        min = Math.min(min, val);
+                        max = Math.max(max, val);
+                    }
+                    //max = max*4;
+                    //values = Math.round(values/max)*max;
+                    average = values / length;
+                    //console.log(Math.round(min*100)/100, Math.round(average*100)/100, Math.round(max*100)/100);
+                    return average;
+                }
+                function makeBar(val, left, color) {
+                    canvasContext.fillStyle = color;
+                    canvasContext.fillRect(left, 0, 20, val);
+                }
+                sensitivityInput.on("change", function() {
+                    params.setSensitivity($(this).val());
+                })
+                noteInput.on("change", function() {
+                    params.setNote($(this).val());
+                })
+                $(".start").click(function() {
+                    navigator.getUserMedia = navigator.getUserMedia ||
+                            navigator.webkitGetUserMedia ||
+                            navigator.mozGetUserMedia;
+                    navigator.getUserMedia({'audio': true}, gotMic, function(err) {
+                        console.log(err)
+                        paused.click()
+                        draw();
+                    });
+                })
+            })
+        </script>
+    </head>
+    <body>
+        <div class="good" style="position:absolute; right:20px; display:none; color: green">Good</div>
+        <canvas></canvas>
+        <div>Mic Sensitivity: <input class="sensitivity" type="range" name="points" min="0" max="100" step="1"></div>
+        <div>Note: <input class="note"> </div>
+        <div class="current"></div>
+        <div><input type="checkbox" class="paused" checked>Paused</div>
+        <button class="start">Start</button>
+        <button class="next">next</button>
+        <pre class="output"></pre>
+        <div>
+<pre style="float:left">
+    "40": 1.0908313378082464,
+    "41": 2.136932623267904,
+    "42": 6.0591663096336825,
+    "43": 18.086572648066472,
+    "44": 31.06736920083701,
+    "45": 36.83547999570466,
+    "46": 45.44207263792506,
+    "47": 33.78379849655226,
+    "48": 50.10698863980959,
+    "49": 91.96551516548384,
+    "50": 111.9570474977271,
+    "51": 86.40103778925979,
+    "52": 60.857883996414095,
+    "53": 112.98309109807084,
+    "54": 218.75046250796515,
+    "55": 265.25267938455926,
+    "56": 79.13491746818113,
+    "57": 166.33296200149366,
+    "58": 124.44711987044363,
+    "59": 227.35341564829685,
+    "60": 141.96122530421738,
+    "61": 64.55716467768696,
+    "62": 119.28494729537215,
+    "63": 24.35141681101527,
+    "64": 109.21247354221683,
+    "65": 147.74719450324844,
+    "66": 121.47243279474311,
+    "67": 48.8173956447304,
+    "68": 163.9909878269835,
+    "69": 76.67403143060726,
+    "70": 31.409449885638022,
+    "71": 204.87342470445503,
+    "72": 72.89886853885397,
+    "73": 165.9848584337853,
+    "74": 218.27142515228874,
+    "75": 159.30238701432773,
+    "76": 132.03304586363333,
+    "77": 308.592750620524,
+    "78": 246.41396060461514,
+    "79": 301.4314505461421,
+    "80": 69.58710239365563,
+    "81": 279.14105587065666,
+    "82": 366.30926550739264,
+    "83": 137.21574621266532,
+    "84": 179.21169997167814,
+</pre>
+<pre style="float:left">
+    "40+": 63.87623014041684,
+    "41+": 97.08711836194719,
+    "42+": 221.04745848309855,
+    "43+": 205.01526135708747,
+    "44+": 209.9284724818416,
+    "45+": 111.43020809017725,
+    "46+": 79.11244434185704,
+    "47+": 131.72406283690182,
+    "48+": 92.77650438122217,
+    "49+": 65.6787628254307,
+    "50+": 135.2313939065096,
+    "51+": 26.017340138385084,
+    "52+": 73.23300962462031,
+    "53+": 98.33435521546149,
+    "54+": 36.31736122070888,
+    "55+": 16.586428047394293,
+    "56+": 74.19809893539994,
+    "57+": 33.09563747223296,
+    "58+": 79.14111059289239,
+    "59+": 72.43164368323572,
+    "60+": 23.82344561401147,
+    "61+": 210.8465403073768,
+    "62+": 101.27107871740897,
+    "63+": 35.473866605996356,
+    "64+": 143.55501459070564,
+    "65+": 220.4589293403482,
+    "66+": 132.04871953676926,
+    "67+": 192.3925118196486,
+    "68+": 65.22294670883268,
+    "69+": 191.31187515687887,
+    "70+": 304.7464754926205,
+    "71+": 84.62502506698107,
+    "72+": 225.67633840986028,
+    "73+": 138.8324640438193,
+    "74+": 91.68140173715301,
+    "75+": 35.492698989863186,
+    "76+": 24.518219065245113,
+    "77+": 63.93172513361614,
+    "78+": 46.93816133728073,
+    "79+": 46.837347419311655,
+    "80+": 29.380681043393892,
+    "81+": 51.9385566349991,
+    "82+": 67.94711721872126,
+    "83+": 20.043057068570562,
+    "84+": 82.8744567924135
+</pre>
+
+    </div>
+    </body>
+</html>
+
+-->
+
