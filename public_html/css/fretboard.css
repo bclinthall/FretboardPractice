@@ -189,6 +189,9 @@ html, body, .overContainer{
 
 .fretboard{
     display:flex;
+    display: -webkit-box;
+display: -webkit-flex;
+display: -ms-flexbox;
     box-shadow: 39px 5px 5px rgba(0,0,0,.3);
     text-shadow: none;
 }
