@@ -7,7 +7,10 @@ html, body, .overContainer{
 }
 .overContainer{
 	position: relative;
-	background-color: #FFF6EB;
+	/*background-color: #FFF6EB;*/
+	background-image: url("green3c.jpg");
+	text-shadow: 6px 5px 5px rgba(0,0,0,0.3);
+	background-size: 100% 100%;
 }
 .mainContent{
 	display: flex;
@@ -147,22 +150,28 @@ html, body, .overContainer{
 
 .fretboard{
 	display:flex;
-	background-color: #876;
+	box-shadow: 39px 5px 5px rgba(0,0,0,.3);
+	text-shadow: none;
 }
 .string{
 	display: flex;
 	flex-grow: 1;
 }
+.note[data-id]{
+    background-color: #9F8F7F;
+}
 .string:first-child .note, .note:first-child{
 	background-image:none;
-	background-color:#FFF6EB;
-
+	background-color: transparent;
+	text-shadow: 6px 5px 5px rgba(0,0,0,.3);
+}
+.note.available:first-child{
+	text-shadow: none;
 }
 
 
 .string:first-child .note{
-	border-color: #FFF6EB;
-}
+background-color: transparent;}
 .note{
 	display: inline-block;
 	position:relative;
@@ -270,7 +279,7 @@ html, body, .overContainer{
 
 }*/
 .string .note.available{
-	background-color: rgba(220,210,200,.7);
+	background-color: rgba(256,256,256,0.7);
 }
 .fromFret.playMode .string .note.available{
 	background-color:rgba(0,0,0,0);
@@ -374,4 +383,11 @@ div#toggleControls * {
 }
 .expanded .toggleExpand:after{
 	background-image: url("../svg/bound.svg");
+}
+
+#toggleControls ul {
+    margin-left: 5px;
+}
+.note:not([data-id]) {
+    background-color: rgb(186,180,165);
 }
