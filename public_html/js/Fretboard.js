@@ -402,7 +402,7 @@ function Fretboard(fretboardDiv, toggleControlsDiv, gameControlsDiv) {
                 $("<button>").text("+").addClass("addBtn").attr("data-selector", selector).appendTo(btnTd);
                 $("<button>").text("-").addClass("removeBtn").attr("data-selector", selector).appendTo(btnTd);
             }
-			$("<div>").text("Select the finger positions you wish to practice by clicking the fretboard or using the controls below. Choose the game to play using the controls at the top.  Then tap \"Play\"").appendTo(toggleControlsDiv);
+			$("<div>").text("Select the finger positions you wish to practice by clicking the fretboard or using the controls below. Choose the game to play using the controls at the top.  Then tap \"Play\".").appendTo(toggleControlsDiv);
             var catDiv = makeControlCatDiv("General", "toggleCatDiv", toggleControlsDiv);
 //                    $(catSel).addClass("toggleCatDiv").appendTo(toggleControlsDiv);
             addToggle("all", "[data-fret]", catDiv);

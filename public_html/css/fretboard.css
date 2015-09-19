@@ -190,14 +190,14 @@ html, body, .overContainer{
 .fretboard{
     display:flex;
     display: -webkit-box;
-display: -webkit-flex;
-display: -ms-flexbox;
+    display: -webkit-flex;
+    display: -ms-flexbox;
     box-shadow: 39px 5px 5px rgba(0,0,0,.3);
     text-shadow: none;
 }
 .string{
     display: flex;
-    display: -webkit-box;
+    display:-webkit-box;
     display: -webkit-flex;
     display: -ms-flexbox;
     flex-grow: 1;
@@ -218,7 +218,10 @@ display: -ms-flexbox;
 
 
 .string:first-child .note{
-    background-color: transparent;}
+    background-color: transparent;
+    z-index: 2;
+    pointer-events: none;
+    }
 .note{
     display: inline-block;
     position:relative;
@@ -352,12 +355,11 @@ display: -ms-flexbox;
     background-color: rgba(256,256,256,0.7);
 }
 .fromFret.playMode .string .note.available{
-    background-color:rgba(0,0,0,0);
 }
 .fromFret.playMode .string .note.available:first-child{
-    background-color:#FFF6EB;
+    background-color: rgba(256,256,256,0.7);
 }
-#scoreDisplayOverlay{
+.overlay{
     position: absolute;
     left: 0;
     top: 0;
@@ -366,7 +368,7 @@ display: -ms-flexbox;
     display: none;
     z-index: 50;
 }
-#scoreDisplayOverlayInner{
+.overlayInner{
     position: absolute;
     top: 50%;
     left: 50%;
@@ -375,7 +377,8 @@ display: -ms-flexbox;
     border: 1px solid black;
     border-radius: 5px;
     padding: 15px;
-
+    box-shadow: 6px 5px 5px rgba(0,0,0,.3);
+    text-shadow: none;
 }
 #scoreDisplay>div{
     margin: 10px;
