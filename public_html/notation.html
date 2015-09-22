@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<!--
+To change this license header, choose License Headers in Project Properties.
+To change this template file, choose Tools | Templates
+and open the template in the editor.
+-->
+<html>
+    <head>
+        <title>TODO supply a title</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <!--<style>
+            .notation{
+                display: inline-block;
+                width: 35px;
+                height: 61px;
+                background-image: url("svg/stafflines.svg");
+                background-repeat: repeat-x;
+                background-origin: content-box;
+                position: relative;
+                vertical-align: baseline;
+                padding:0;
+                margin:0;
+            }
+            .notation::after{
+                display: inline-block;
+                background-image: url("svg/stafflines.svg");
+                background-origin: content-box;
+                padding: inherit;
+                content: " ";
+                position:absolute;
+                top: 0;
+                bottom: 0;
+                left: 10px;
+                width: 20px;
+            }
+            .notation::before{
+                display: inline-block;
+                background-image: url("svg/nBody.svg");
+                background-origin: content-box;
+                padding: inherit;
+                content: " ";
+                position:absolute;
+                top: 0px;
+                left: 12px;
+                background-repeat: no-repeat;
+                height: 42px;
+                width: 36px;
+                z-index: 2;
+            }
+            .notation[data-accidental=sharp]::before{
+                background-image: url("svg/nSharp.svg");
+                left: 0px;
+            }
+            .notation[data-accidental=flat]::before{
+                background-image: url("svg/nFlat.svg");
+                left: 0px;
+            }
+            .notation[data-note=treble]::before{
+                background-image: none;
+                
+            }
+            .notation[data-note=treble]{
+                width:40px;
+            }
+            .trebleClef{
+                height: 87px;
+                position: absolute;
+                top: -6px;
+                z-index:2;
+            }
+            
+        </style>-->
+        <link rel="stylesheet" href="MusicNotation/musicNotation.css">
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+        <script>
+            var scaleForMidi = ['C', 'Db', 'D', 'Eb', 'E', 'F', 'Gb', 'G', 'Ab', 'A', 'Bb', 'B'];
+            var scaleForPlacement = "CDEFGAB";
+            function midiToFrequency(midi) {
+                var aOffset = midi - 69;
+                var a = 440;
+                return a * Math.pow(2, aOffset / 12);
+            }
+            function noteToMidi(note) {
+                var n = note.substring(0, note.length - 1);
+                var o = parseInt(note.substring(note.length - 1));
+                var noteIndex = scaleForMidi.indexOf(n);
+                o++;
+                return o * 12 + noteIndex;
+            }
+            function midiToNote(midi) {
+                var index = midi % 12;
+                var o = Math.floor(midi / 12);
+                o--;
+                return scaleForMidi[index] + o;
+            }
+            function numberToNote(number){
+                var index = number % 7;
+                var o = Math.floor(number / 7);
+                o;
+                return scaleForPlacement[index] + o;
+            }
+            
+            function analyseNote(note){
+                var accidentals = {
+                    b: "flat",
+                    "#": "sharp",
+                }
+                var o = parseInt(note.substr(note.length-1));
+                if(note.length === 3){
+                    var accidental = note.substr(1, note.length-2);
+                }
+                accidental = accidentals[accidental];
+                note = note.substr(0,1);
+                
+                return {note: note, o: o, accidental: accidental}
+            }
+            function noteToNumber(note){
+                note = analyseNote(note);
+                return note.o * 7 + scaleForPlacement.indexOf(note.note);
+            }
+            function noteToFrequency(note) {
+                return midiToFrequency(noteToMidi(note));
+            }
+            
+            var cssForNoteNumber = function(noteNumber, guitar){
+                if(guitar){
+                    noteNumber += 7;
+                }
+                var top = 6*(36-noteNumber)-1;
+                var paddingB = 6*(30-noteNumber);
+                var paddingT = (noteNumber - 39) * 6;
+                return {top: top, paddingB: paddingB, paddingT: paddingT};
+            };
+            function makeNote(note){
+                note = analyseNote(note);
+                var acc = note.accidental;
+                note = note.note + note.o;
+                var num = noteToNumber(note);
+                return $("<div>")
+                        .addClass("notation")
+                        .html("&nbsp;")
+                        .attr({"data-note": note, "data-noteNumber": num, "data-accidental": acc});
+            }
+            function makeTrebleClef(){
+                var trebDiv = $("<div>").addClass("notation").attr("data-note", "treble").html("&nbsp;");
+                $("<img>").addClass("trebleClef").attr("src", "MusicNotation/Treble_Clef_without_line.svg").appendTo(trebDiv);
+                return trebDiv;
+            }
+            function makeStaffInput(startNote, endNote, callBack){
+                var staffInput = $("<div>");
+                var startNum = noteToNumber(startNote);
+                var endNum = noteToNumber(endNote) + 1;
+                var ary = [
+                    $("<div>").addClass("notation forInput").html("&nbsp;").appendTo(staffInput),
+                    $("<div>").addClass("notation forInput").html("&nbsp;").appendTo(staffInput),
+                    $("<div>").addClass("notation forInput").html("&nbsp;").appendTo(staffInput),
+                    $("<div>").addClass("notation forInput").html("&nbsp;").appendTo(staffInput)
+                ];
+                for(var i=0; i<ary.length; i++){
+                    ary[i].notes = [];
+                }
+                for(var i=startNum; i<endNum; i++){
+                    var cssInfo = cssForNoteNumber(i, true);
+                    var inputNoteObj = {};
+                    inputNoteObj.note = $("<img>").attr({src: "svg/noteHeadPlain.svg", "data-inputnote": numberToNote(i)})
+                            .addClass("inputNote");
+                    inputNoteObj.top = cssInfo.top+18;
+                    var where = ary[(i+ary.length)%ary.length];
+                    where.notes.push(inputNoteObj);
+                    inputNoteObj.note.appendTo(where);
+                    if(!where.padded){
+                        where.padded = true;
+                        where.css("padding-bottom", cssInfo.paddingB);
+                    }
+                    where.css("padding-top", cssInfo.paddingT);
+                    where.paddingT = cssInfo.paddingT;
+                    inputNoteObj.note.click(callBack);
+                }
+                for(var divIndex = 0; divIndex<ary.length; divIndex++){
+                    var div = ary[divIndex];
+                    for(var i=0; i<div.notes.length; i++){
+                        var inputNoteObj = div.notes[i];
+                        inputNoteObj.note.css("top", (inputNoteObj.top + div.paddingT) + "px");
+                    }
+                }
+                makeTrebleClef().prependTo(staffInput);
+                return staffInput;
+            }
+            $(function() {
+                var css = "";
+                makeTrebleClef().appendTo($("body"));
+                for (var i = 16; i < 55; i++) {
+                    
+                    var note = numberToNote(i);
+                    var cssInfo = cssForNoteNumber(i, true);
+                    var div = $("<div>").addClass("notation quarter").attr({"data-note": note, "data-noteNumber": i}).html(note).appendTo($("body"));
+                    if (i===33){
+                        div.attr({"data-accidental": "sharp"});
+                    }
+                    if(i===35){
+                        div.attr({"data-accidental": "flat"});
+                    }
+                    css+= ".notation[data-note="+note+"]{";
+                    if(cssInfo.paddingB>0){
+                        css += "padding-bottom:" + cssInfo.paddingB + "px;";
+                    }
+                    if(cssInfo.paddingT>0){
+                        css += "padding-top:" + cssInfo.paddingT + "px;";
+                    }
+                    css+="}\n";
+                    
+                    css+= ".notation[data-note="+note+"]::before{top: " + cssInfo.top + "px;}\n";
+                    
+                }
+                //$("<style>").html(css).appendTo($("head"));
+                $("[data-note]").click(function(){
+                    var acc = $(this).attr("data-accidental");
+                    if(acc === "sharp"){
+                        $(this).attr("data-accidental", "flat");
+                    }else if(acc ==="flat"){
+                        $(this).removeAttr("data-accidental");
+                    }else{
+                        $(this).attr("data-accidental", "sharp")
+                    }
+                })
+            })
+            
+            
+            /*  
+            $("body").empty();
+            var cb = function(){
+                console.log($(this).attr("data-inputnote"));
+            };
+            makeStaffInput("E2", "E5", cb).appendTo($("body"));
+            */
+        </script>
+    </head>
+    <body>
+</html>

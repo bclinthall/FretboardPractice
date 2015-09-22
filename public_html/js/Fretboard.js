@@ -174,6 +174,7 @@ function Fretboard(fretboardDiv, toggleControlsDiv, gameControlsDiv) {
 					newNote = randInAry(available);
 				}
 				correctAnswer = newNote;
+                                setStaffNote(newNote);
 				$(".toFretQuestion").text(newNote);
 				if(pitchListener){
 					pitchListener.listenFor(newNote);

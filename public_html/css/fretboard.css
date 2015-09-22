@@ -471,3 +471,10 @@ div#toggleControls * {
 .note:not([data-id]) {
     background-color: rgb(186,180,165);
 }
+.staff{
+    display: none;
+    vertical-align: baseline;
+}
+.playMode.toFret .staff{
+    display: inline-block;
+}

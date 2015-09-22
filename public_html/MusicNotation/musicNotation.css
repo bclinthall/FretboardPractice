@@ -1,0 +1,144 @@
+/*
+To change this license header, choose License Headers in Project Properties.
+To change this template file, choose Tools | Templates
+and open the template in the editor.
+*/
+/* 
+    Created on : Sep 20, 2015, 8:53:58 PM
+    Author     : bclinthall
+*/
+.notation{
+    display: inline-block;
+    width: 35px;
+    height: 61px;
+    background-image: url("stafflines.svg");
+    background-repeat: repeat-x;
+    background-origin: content-box;
+    position: relative;
+    vertical-align: baseline;
+    padding:0;
+    margin:0;
+}
+.notation::after{
+    display: inline-block;
+    background-image: url("stafflines.svg");
+    background-origin: content-box;
+    padding: inherit;
+    content: " ";
+    position:absolute;
+    top: 0;
+    bottom: 0;
+    left: 10px;
+    width: 20px;
+}
+.notation::before{
+    display: inline-block;
+    background-image: url("nHead.svg");
+    background-origin: content-box;
+    padding: inherit;
+    content: " ";
+    position:absolute;
+    top: 0px;
+    left: 12px;
+    background-repeat: no-repeat;
+    height: 42px;
+    width: 36px;
+    z-index: 2;
+}
+.notation[data-accidental=sharp]::before{
+    background-image: url("nSharp.svg");
+    left: 0px;
+}
+.notation[data-accidental=flat]::before{
+    background-image: url("nFlat.svg");
+    left: 0px;
+}
+.notation[data-note=treble]::before{
+    background-image: none;
+
+}
+.notation[data-note=treble]{
+    width:40px;
+}
+.trebleClef{
+    height: 87px;
+    position: absolute;
+    top: -6px;
+    z-index:2;
+}
+.inputNote{
+    position:absolute;
+    z-index:2;
+    left: 13px;
+}
+.notation.forInput::before{
+    background-image: none;
+}
+.notation[data-note=E1]{padding-bottom:84px;}
+.notation[data-note=E1]::before{top: 119px;}
+.notation[data-note=F1]{padding-bottom:78px;}
+.notation[data-note=F1]::before{top: 113px;}
+.notation[data-note=G1]{padding-bottom:72px;}
+.notation[data-note=G1]::before{top: 107px;}
+.notation[data-note=A1]{padding-bottom:66px;}
+.notation[data-note=A1]::before{top: 101px;}
+.notation[data-note=B1]{padding-bottom:60px;}
+.notation[data-note=B1]::before{top: 95px;}
+.notation[data-note=C2]{padding-bottom:54px;}
+.notation[data-note=C2]::before{top: 89px;}
+.notation[data-note=D2]{padding-bottom:48px;}
+.notation[data-note=D2]::before{top: 83px;}
+.notation[data-note=E2]{padding-bottom:42px;}
+.notation[data-note=E2]::before{top: 77px;}
+.notation[data-note=F2]{padding-bottom:36px;}
+.notation[data-note=F2]::before{top: 71px;}
+.notation[data-note=G2]{padding-bottom:30px;}
+.notation[data-note=G2]::before{top: 65px;}
+.notation[data-note=A2]{padding-bottom:24px;}
+.notation[data-note=A2]::before{top: 59px;}
+.notation[data-note=B2]{padding-bottom:18px;}
+.notation[data-note=B2]::before{top: 53px;}
+.notation[data-note=C3]{padding-bottom:12px;}
+.notation[data-note=C3]::before{top: 47px;}
+.notation[data-note=D3]{padding-bottom:6px;}
+.notation[data-note=D3]::before{top: 41px;}
+.notation[data-note=E3]::before{top: 35px;}
+.notation[data-note=F3]::before{top: 29px;}
+.notation[data-note=G3]::before{top: 23px;}
+.notation[data-note=A3]::before{top: 17px;}
+.notation[data-note=B3]::before{top: 11px;}
+.notation[data-note=C4]::before{top: 5px;}
+.notation[data-note=D4]::before{top: -1px;}
+.notation[data-note=E4]::before{top: -7px;}
+.notation[data-note=F4]::before{top: -13px;}
+.notation[data-note=G4]::before{top: -19px;}
+.notation[data-note=A4]{padding-top:6px;}
+.notation[data-note=A4]::before{top: -25px;}
+.notation[data-note=B4]{padding-top:12px;}
+.notation[data-note=B4]::before{top: -31px;}
+.notation[data-note=C5]{padding-top:18px;}
+.notation[data-note=C5]::before{top: -37px;}
+.notation[data-note=D5]{padding-top:24px;}
+.notation[data-note=D5]::before{top: -43px;}
+.notation[data-note=E5]{padding-top:30px;}
+.notation[data-note=E5]::before{top: -49px;}
+.notation[data-note=F5]{padding-top:36px;}
+.notation[data-note=F5]::before{top: -55px;}
+.notation[data-note=G5]{padding-top:42px;}
+.notation[data-note=G5]::before{top: -61px;}
+.notation[data-note=A5]{padding-top:48px;}
+.notation[data-note=A5]::before{top: -67px;}
+.notation[data-note=B5]{padding-top:54px;}
+.notation[data-note=B5]::before{top: -73px;}
+.notation[data-note=C6]{padding-top:60px;}
+.notation[data-note=C6]::before{top: -79px;}
+.notation[data-note=D6]{padding-top:66px;}
+.notation[data-note=D6]::before{top: -85px;}
+.notation[data-note=E6]{padding-top:72px;}
+.notation[data-note=E6]::before{top: -91px;}
+.notation[data-note=F6]{padding-top:78px;}
+.notation[data-note=F6]::before{top: -97px;}
+.notation[data-note=G6]{padding-top:84px;}
+.notation[data-note=G6]::before{top: -103px;}
+.notation[data-note=A6]{padding-top:90px;}
+.notation[data-note=A6]::before{top: -109px;}
