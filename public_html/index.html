@@ -359,9 +359,13 @@ and open the template in the editor.
                 var answerMode = localStorage.getItem("answerMode");
                 if(questionMode){
                     $("#QuestionMode").val(questionMode);
+                    $("#AnswerMode").children("option").prop("disabled", false);
+                    $("#AnswerMode").find("[value="+questionMode+"]").prop("disabled", true);
                 }
                 if(answerMode){
                     $("#AnswerMode").val(answerMode);
+                    $("#QuestionMode").children("option").prop("disabled", false);
+                    $("#QuestionMode").find("[value="+answerMode+"]").prop("disabled", true);
                 }
                 gameTypeChange();
 
