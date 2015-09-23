@@ -3,8 +3,10 @@
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group name="PsalmSing">
-            <file>file:/Users/bclinthall/Development/NetBeansWorkspace/Fretboard/public_html/listen.html</file>
-            <file>file:/Users/bclinthall/Development/NetBeansWorkspace/Fretboard/public_html/js/PitchListener.js</file>
+            <file>file:/Users/bclinthall/Development/NetBeansWorkspace/Fretboard/public_html/notation.html</file>
+            <file>file:/Users/bclinthall/Development/NetBeansWorkspace/Fretboard/public_html/css/fretboard.css</file>
+            <file>file:/Users/bclinthall/Development/NetBeansWorkspace/Fretboard/public_html/js/Fretboard.js</file>
+            <file>file:/Users/bclinthall/Development/NetBeansWorkspace/Fretboard/public_html/index.html</file>
         </group>
     </open-files>
 </project-private>

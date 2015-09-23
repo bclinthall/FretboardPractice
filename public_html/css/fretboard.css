@@ -35,9 +35,7 @@ html, body, .overContainer{
     display: inline-block;
     margin: 2px 2px 0;
 }
-.fromFret .useGuitar{
-    display: none;
-}
+
 @media all and (orientation:landscape) and (max-height: 300px), (max-width: 600px){
     .fretboard {
         font-size: 75%;
@@ -89,7 +87,7 @@ html, body, .overContainer{
         height: 600%;
 
     }
-    .ansBtnBox{
+    .noteNameAnswers{
         flex-direction: row;
         -webkit-flex-direction: row;
         -ms-flex-direction: row;
@@ -157,7 +155,7 @@ html, body, .overContainer{
         bottom: 0;
         width: 600%;
     }
-    .ansBtnBox{
+    .noteNameAnswers{
         flex-direction: column;
         -webkit-flex-direction: column;
         -ms-flex-direction: column;
@@ -275,7 +273,7 @@ html, body, .overContainer{
 }
 
 
-.ansBtnBox{
+.noteNameAnswers{
     flex: 1 1 100px;
     -webkit-flex: 1 1 100px;
     -ms-flex: 1 1 100px;
@@ -355,8 +353,6 @@ html, body, .overContainer{
 }*/
 .string .note.available{
     background-color: rgba(256,256,256,0.7);
-}
-.fromFret.playMode .string .note.available{
 }
 .fromFret.playMode .string .note.available:first-child{
     background-color: rgba(256,256,256,0.7);
@@ -470,11 +466,4 @@ div#toggleControls * {
 }
 .note:not([data-id]) {
     background-color: rgb(186,180,165);
-}
-.staff{
-    display: none;
-    vertical-align: baseline;
-}
-.playMode.toFret .staff{
-    display: inline-block;
 }

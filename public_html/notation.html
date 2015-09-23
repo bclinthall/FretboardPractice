@@ -112,12 +112,8 @@ and open the template in the editor.
                 }
                 accidental = accidentals[accidental];
                 note = note.substr(0,1);
-                
-                return {note: note, o: o, accidental: accidental}
-            }
-            function noteToNumber(note){
-                note = analyseNote(note);
-                return note.o * 7 + scaleForPlacement.indexOf(note.note);
+                var number = o * 7 + scaleForPlacement.indexOf(note);
+                return {note: note, o: o, accidental: accidental, number: number};
             }
             function noteToFrequency(note) {
                 return midiToFrequency(noteToMidi(note));
@@ -135,8 +131,9 @@ and open the template in the editor.
             function makeNote(note){
                 note = analyseNote(note);
                 var acc = note.accidental;
+                var num = note.number;
                 note = note.note + note.o;
-                var num = noteToNumber(note);
+                
                 return $("<div>")
                         .addClass("notation")
                         .html("&nbsp;")
@@ -147,42 +144,50 @@ and open the template in the editor.
                 $("<img>").addClass("trebleClef").attr("src", "MusicNotation/Treble_Clef_without_line.svg").appendTo(trebDiv);
                 return trebDiv;
             }
-            function makeStaffInput(startNote, endNote, callBack){
+            function makeStaffInput(callBack, startNote, endNote){
+                var noteNumArray = [];
+                if(typeof startNote === "object"){
+                    noteNumArray = startNote;
+                    for(var i=0; i<noteNumArray.length; i++){
+                        noteNumArray[i] = analyseNote(noteNumArray[i]).number;
+                    }
+                }else{
+                    var startNum = analyseNote(startNote).number;
+                    var endNum = analyseNote(endNote).number + 1;
+                    for(var i=startNum; i<endNum; i++){
+                        noteNumArray.push(i);
+                    }
+                }
                 var staffInput = $("<div>");
-                var startNum = noteToNumber(startNote);
-                var endNum = noteToNumber(endNote) + 1;
-                var ary = [
+                var divArray = [
                     $("<div>").addClass("notation forInput").html("&nbsp;").appendTo(staffInput),
                     $("<div>").addClass("notation forInput").html("&nbsp;").appendTo(staffInput),
                     $("<div>").addClass("notation forInput").html("&nbsp;").appendTo(staffInput),
                     $("<div>").addClass("notation forInput").html("&nbsp;").appendTo(staffInput)
                 ];
-                for(var i=0; i<ary.length; i++){
-                    ary[i].notes = [];
-                }
-                for(var i=startNum; i<endNum; i++){
-                    var cssInfo = cssForNoteNumber(i, true);
-                    var inputNoteObj = {};
-                    inputNoteObj.note = $("<img>").attr({src: "svg/noteHeadPlain.svg", "data-inputnote": numberToNote(i)})
+                for(var i=0; i<noteNumArray.length; i++){
+                    var cssInfo = cssForNoteNumber(noteNumArray[i], true);
+                    var note = $("<img>").attr({src: "svg/noteHeadPlain.svg", "data-inputnote": numberToNote(i)})
                             .addClass("inputNote");
-                    inputNoteObj.top = cssInfo.top+18;
-                    var where = ary[(i+ary.length)%ary.length];
-                    where.notes.push(inputNoteObj);
-                    inputNoteObj.note.appendTo(where);
+                    note.css("top", (cssInfo.top + 18) +"px");
+                    var where = divArray[(i+divArray.length)%divArray.length];
+                    note.appendTo(where);
                     if(!where.padded){
                         where.padded = true;
                         where.css("padding-bottom", cssInfo.paddingB);
                     }
                     where.css("padding-top", cssInfo.paddingT);
                     where.paddingT = cssInfo.paddingT;
-                    inputNoteObj.note.click(callBack);
+                    note.click(callBack);
                 }
-                for(var divIndex = 0; divIndex<ary.length; divIndex++){
-                    var div = ary[divIndex];
-                    for(var i=0; i<div.notes.length; i++){
-                        var inputNoteObj = div.notes[i];
-                        inputNoteObj.note.css("top", (inputNoteObj.top + div.paddingT) + "px");
-                    }
+                for(var divIndex = 0; divIndex<divArray.length; divIndex++){
+                    var div = divArray[divIndex];
+                    var paddingT = parseInt(div.css("padding-top"));
+                    div.children().each(function(index, note){
+                        note = $(note)
+                        var top = parseInt(note.css("top"));
+                        note.css("top", (top+paddingT) + "px");
+                    })
                 }
                 makeTrebleClef().prependTo(staffInput);
                 return staffInput;
