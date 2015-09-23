@@ -39,7 +39,7 @@ and open the template in the editor.
     content: " ";
     position:absolute;
     top: 0px;
-    left: 12px;
+    left: 0px;
     background-repeat: no-repeat;
     height: 42px;
     width: 36px;
@@ -47,11 +47,9 @@ and open the template in the editor.
 }
 .notation[data-accidental=sharp]::before{
     background-image: url("nSharp.svg");
-    left: 0px;
 }
 .notation[data-accidental=flat]::before{
     background-image: url("nFlat.svg");
-    left: 0px;
 }
 .notation[data-note=treble]::before{
     background-image: none;
@@ -66,14 +64,42 @@ and open the template in the editor.
     top: -6px;
     z-index:2;
 }
+.notation.forInput::before{
+    background-image: none;
+}
 .inputNote{
     position:absolute;
     z-index:2;
     left: 13px;
+    width:15px;
+    height:15px;
+}
+.inputNote::before{
+    content: " ";
+    background-image: url("nHead.svg");
+    position: absolute;
+    width: 50px;
+    height: 50px;
+    left: -13px;
+    top: -18px;
+    background-repeat: no-repeat;
+}
+.inputNote[data-accidental=sharp]::before{
+    background-image: url("nSharp.svg");
+}
+.inputNote[data-accidental=flat]::before{
+    background-image: url("nFlat.svg");
+}
+/*
+.notation.forInput[data-accidental=sharp]::before{
+    background-image: url("nSharp.svg");
 }
 .notation.forInput::before{
     background-image: none;
 }
+.notation.forInput[data-accidental=flat]::before{
+    background-image: url("nFlat.svg");
+}*/
 .notation[data-note=E1]{padding-bottom:84px;}
 .notation[data-note=E1]::before{top: 119px;}
 .notation[data-note=F1]{padding-bottom:78px;}

@@ -242,19 +242,9 @@ and open the template in the editor.
             }
 
         </script>
-        <script>
-            $(function() {
-                $("input[name=gameType]").change(function() {
-                    $(".overContainer").removeClass("toFret fromFret").addClass($("input[name=gameType]:checked").val())
-                })
-                $("input[name=gameType]").change();
-
-            })
-        </script>
+        
         <style>
-            #toggleControls{
-                display: none;
-            }
+
             .setupMode #toggleControls{
                 display: block;
             }
@@ -262,17 +252,7 @@ and open the template in the editor.
             .noteNameAnswers{
                 display: flex;
             }
-            .noteNameQuestion{
-                display: none;
-                position: relative;
-                width: 30px;
-                height: 30px;
-                line-height: 30px;
-                text-align: center;
-                flex: 0 0 auto;
-                vertical-align: baseline;
-                top:25px;
-            }
+
             .listenerCanvas{
                 display:none;
                 vertical-align: baseline;
@@ -283,7 +263,7 @@ and open the template in the editor.
             .setupMode .setupBtn{
                 display: none;
             }
-            .playMode .playBtn{
+            .playBtn{
                 display: none;
             }
             .topControls.currentScoreDisp{
@@ -301,7 +281,7 @@ and open the template in the editor.
                 width: 30px;
                 height: 30px;
             }
-            
+
 
 
             #time{
@@ -315,16 +295,14 @@ and open the template in the editor.
                 text-align: center;
                 text-decoration: underline;
             }
-            select{
-                background-color:red;
+            select, input, button{
+                box-shadow: 6px 5px 5px rgba(0,0,0,0.3);
 
             }
             .highScoreDisp{
                 float:right;
             }
-            .staffQuestion, .staffAnswer, .guitarAnswer{
-                display: inline-block;
-            }
+
         </style>
         <script>
             function analyseNote(note) {
@@ -338,8 +316,8 @@ and open the template in the editor.
                 }
                 accidental = accidentals[accidental];
                 note = note.substr(0, 1);
-
-                return {note: note, o: o, accidental: accidental}
+                var number = o * 7 + scaleForPlacement.indexOf(note);
+                return {note: note, o: o, accidental: accidental, number: number};
             }
             function setStaffNote(note) {
                 note = analyseNote(note);
@@ -355,8 +333,37 @@ and open the template in the editor.
 
             }
             $(function() {
-                setStaffNote("C#3");
+                function gameTypeChange(){
+                    var questionMode = $("#QuestionMode").val();
+                    var answerMode = $("#AnswerMode").val();
+                    console.log(questionMode, answerMode);
+                    localStorage.setItem("questionMode", questionMode);
+                    localStorage.setItem("answerMode", answerMode);
+                    if(questionMode==="false" || answerMode === "false"){
+                        $(".playBtn").hide();
+                        return;
+                    }
+                    $(".playBtn").show();
+                    if(this.id==="QuestionMode"){
+                        $("#AnswerMode").children("option").prop("disabled", false);
+                        $("#AnswerMode").find("[value="+questionMode+"]").prop("disabled", true);
+                    }
+                    if(this.id==="AnswerMode"){
+                        $("#QuestionMode").children("option").prop("disabled", false);
+                        $("#QuestionMode").find("[value="+answerMode+"]").prop("disabled", true);
+                    }
 
+                }
+                $(".gameTypeControls").on("change", "select", gameTypeChange)
+                var questionMode = localStorage.getItem("questionMode");
+                var answerMode = localStorage.getItem("answerMode");
+                if(questionMode){
+                    $("#QuestionMode").val(questionMode);
+                }
+                if(answerMode){
+                    $("#AnswerMode").val(answerMode);
+                }
+                gameTypeChange();
 
 
             })
@@ -366,20 +373,22 @@ and open the template in the editor.
     <body >
         <div class="overContainer setupMode fromFret">
             <div class="topBar">
+                <div class="topControls gameTypeControls">
+                    <select id="QuestionMode">
+                        <option value=false>Ask with...</option>
+                        <option value="fretboard">Fretboard</option>
+                        <option value="noteNameQuestion">Note Name</option>
+                        <option value="staffQuestion">Staff</option>
+                    </select>
+                    <select id="AnswerMode">
+                        <option value=false>Answer with...</option>
+                        <option value="fretboard">Fretboard</option>
+                        <option value="noteNameAnswers">Note Name</option>
+                        <option value="staffAnswer">Staff</option>
+                        <option value="guitarAnswer">Real Guitar</option>
+                    </select>
+                </div>
                 <div id="modeControls" class="topControls"></div>
-                <select id="QuestionMode">
-                    <option>Ask with...</option>
-                    <option value="fretboard">Fretboard</option>
-                    <option value="staffQuestion">Staff</option>
-                    <option value="noteNameQuestion">Note Name</option>
-                </select>
-                <select id="AnswerMode">
-                    <option>Answer with...</option>
-                    <option disabled value="fretboard">Fretboard</option>
-                    <option value="staffAnswer">Staff</option>
-                    <option value="noteNameAnswers">Note Name</option>
-                    <option value="guitarAnswer">Real Guitar</option>
-                </select>
                 <div id="time" class="topControls"></div>
                 <div class="currentScoreDisp topControls"><span class='currentScore'></span></div>
                 <div class='topControls highScoreDisp'><span class="highScore"></span></div>
@@ -390,8 +399,9 @@ and open the template in the editor.
                 </div>-->
             </div>
             <div class="mainContent">
+                <div class="filler mainFillerA"></div>
                 <div id="toggleControls"></div>
-                <div class="filler"></div>
+                <div class="filler mainFillerB"></div>
             </div>
             <div id="scoreDisplayOverlay" class="overlay">
                 <div id="scoreDisplayOverlayInner" class="overlayInner">
@@ -404,50 +414,62 @@ and open the template in the editor.
             </div>
         </div>
         <div class="holdingTank" style="display:none">
-            <span class="noteNameQuestion questionDiv">F </span> 
-            <div class="staffQuestion"><div class="notation" data-note="treble">&nbsp;<img class="trebleClef" src="MusicNotation/Treble_Clef_without_line.svg"/></div><div class="notation staffNote" data-note="C4" data-accidental="sharp">&nbsp;</div></div>
-            <canvas class="listenerCanvas guitarAnswer" style="height:30px; width: 10px;" height="30" width="10"></canvas>
+            <div class="noteNameQuestion">
+                <div class="filler"></div>
+                <div style="position: relative"><span class="questionNote questionDiv">F </span> </div>
+                <div class="filler"></div>
+            </div>
+            <div class="staffQuestion">
+                <div class="filler"></div>
+                <div style="position: relative">
+                    <div class="staffQuestionBox">
+                        <div class="notation" data-note="treble">&nbsp;<img class="trebleClef" src="MusicNotation/Treble_Clef_without_line.svg"/></div><div class="notation staffNote" data-note="C4" data-accidental="sharp">&nbsp;</div>
+                    </div>
+                </div>
+                <div class="filler"></div>
+            </div>
+            <div class="guitarAnswer"><div class="filler"></div><canvas class="listenerCanvas" style="height:30px; width: 10px;" height="30" width="10"></canvas><div class="filler"></div></div>
             <div class="staffAnswer">
                 <div class="filler"></div>
                 <div class="staffInputDiv"></div>
                 <div class="filler"></div>
             </div>
             <div class="fretboard"></div>
-                
+
             <div class="noteNameAnswers">
                 <div class="filler"></div>
                 <div class="ansBtns">
                     <div class="naturals">
-                        <div class="available" data-notename="C">
+                        <div class="available answerBtn" data-notename="C">
                             <div class="ansBtnLabel">C</div>
                         </div>
-                        <div class="available" data-notename="D">
+                        <div class="available answerBtn" data-notename="D">
                             <div class="ansBtnLabel">D</div>
                         </div>
-                        <div class="available" data-notename="E">
+                        <div class="available answerBtn" data-notename="E">
                             <div class="ansBtnLabel">E</div>
                         </div>
-                        <div class="available" data-notename="F">
+                        <div class="available answerBtn" data-notename="F">
                             <div class="ansBtnLabel">F</div>
                         </div>
-                        <div class="available" data-notename="G">
+                        <div class="available answerBtn" data-notename="G">
                             <div class="ansBtnLabel">G</div>
                         </div>
-                        <div class="available" data-notename="A">
+                        <div class="available answerBtn" data-notename="A">
                             <div class="ansBtnLabel">A</div>
 
-                        </div><div class="available" data-notename="B">
+                        </div><div class="available answerBtn" data-notename="B">
                             <div class="ansBtnLabel">B</div>
                         </div>
                     </div>
                     <div class="accidentals">
                         <div class="ansBtnSpacer"></div>
-                        <div class="available" data-notename="C#"><div class="ansBtnLabel">C#<span></span>Db</div></div>
-                        <div class="available" data-notename="D#"><div class="ansBtnLabel">D#<span></span>Eb</div></div>
-                        <div class="available" style="border: 0 none"></div>
-                        <div class="available" data-notename="F#"><div class="ansBtnLabel">F#<span></span>Gb</div></div>
-                        <div class="available"  data-notename="G#"><div class="ansBtnLabel">G#<span></span>Ab</div></div>
-                        <div class="available" data-notename="A#"> <div class="ansBtnLabel">A#<span></span>Bb</div></div>
+                        <div class="available answerBtn" data-notename="C#"><div class="ansBtnLabel">C#<span></span>Db</div></div>
+                        <div class="available answerBtn" data-notename="D#"><div class="ansBtnLabel">D#<span></span>Eb</div></div>
+                        <div class="available answerBtn" style="border: 0 none"></div>
+                        <div class="available answerBtn" data-notename="F#"><div class="ansBtnLabel">F#<span></span>Gb</div></div>
+                        <div class="available answerBtn"  data-notename="G#"><div class="ansBtnLabel">G#<span></span>Ab</div></div>
+                        <div class="available answerBtn" data-notename="A#"> <div class="ansBtnLabel">A#<span></span>Bb</div></div>
                         <div class="ansBtnSpacer"></div>
                     </div>
                 </div>

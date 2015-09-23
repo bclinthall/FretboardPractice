@@ -1,5 +1,5 @@
-<svg xmlns="http://www.w3.org/2000/svg" height="42" width="15">
-    <g id="blackNotehead" transform="translate(0,18) scale(1.8571)  ">
+<svg xmlns="http://www.w3.org/2000/svg" height="42" width="50">
+    <g id="blackNotehead" transform="translate(12,18) scale(1.8571)  ">
         <ellipse  id = "blackNotehead" cx="4" cy="3.5" rx="4.35" ry="2.9" style="fill: #000000;" transform="rotate(-33.33,4,3.5)" />
     </g>
 </svg> 

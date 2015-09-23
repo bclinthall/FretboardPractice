@@ -18,7 +18,8 @@ function Fretboard(fretboardDiv, toggleControlsDiv, gameControlsDiv) {
     }
     function getGameKey() {
         var obj = {
-            gameType: $("input[name=gameType]:checked").val(),
+            questionMode: $("#QuestionMode").val(),
+            answerMode:  $("#AnswerMode").val(),
             tuning: tuning,
             available: getAvailable()
         }
@@ -35,7 +36,6 @@ function Fretboard(fretboardDiv, toggleControlsDiv, gameControlsDiv) {
     }
 
     function Game(available) {
-        console.log(available);
         if (available.length < 2) {
             modeControls.setupMode();
             alert("You must select more than one fret to play.")
@@ -100,7 +100,7 @@ function Fretboard(fretboardDiv, toggleControlsDiv, gameControlsDiv) {
         }
         showHighScore();
         function registerIncorrect() {
-            var divOverlay = overlay($(".flash"));
+            var divOverlay = overlay($(".flashAnswer, .flashQuestion"));
             divOverlay.hide();
             divOverlay.css({"background-color": "red", "border-radius": "5px"})
             divOverlay
@@ -109,6 +109,7 @@ function Fretboard(fretboardDiv, toggleControlsDiv, gameControlsDiv) {
                     .fadeIn({duration: time, queue: true})
                     .fadeOut({duration: time, queue: true, complete: function() {
                             divOverlay.remove();
+                            $(".flashAnswer").removeClass("flashAnswer");
                         }})
             currentScore--;
             showScore()
@@ -117,8 +118,8 @@ function Fretboard(fretboardDiv, toggleControlsDiv, gameControlsDiv) {
         function registerCorrect(div, log) {
             if (!gotAnswer) {
                 gotAnswer = true;
-                console.log(log);
-                var divOverlay = overlay($(".flash"));
+                if(log) console.log(log);
+                var divOverlay = overlay($(".flashAnswer, .flashQuestion"));
                 divOverlay.hide();
                 divOverlay.css({"background-color": "green", "border-radius": "5px"});
                 var count = divOverlay.length;
@@ -129,6 +130,7 @@ function Fretboard(fretboardDiv, toggleControlsDiv, gameControlsDiv) {
                                 if (--count === 0) {
                                     newQuestion();
                                     gotAnswer = false;
+                                    $(".flashAnswer").removeClass("flashAnswer");
                                 }
                             }})
                 currentScore++;
@@ -136,9 +138,9 @@ function Fretboard(fretboardDiv, toggleControlsDiv, gameControlsDiv) {
             }
         }
         function registerGuess(guess) {
-            var o = guess[guess.length-1];
+            var o = guess[guess.length - 1];
             var regexp = /\d/g;
-            if(!regexp.test(o)){
+            if (!regexp.test(o)) {
                 correctAnswer = correctAnswer.replace(regexp, "");
             }
             if (guess === correctAnswer) {
@@ -163,18 +165,18 @@ function Fretboard(fretboardDiv, toggleControlsDiv, gameControlsDiv) {
             }
         }
         function newQuestion() {
-            $(".flash").removeClass("flash");
-            if ($("#QuestionType").val() === "fretboard") {
+            $(".flashQuestion").removeClass("flashQuestion");
+            if ($("#QuestionMode").val() === "fretboard") {
 
                 var newPos = randInAry(available);
-                while (newPos === positionId) {
+                while (newPos && newPos === positionId) {
                     newPos = randInAry(available);
                 }
                 positionId = newPos;
                 var positionDiv = $("[data-id=" + positionId + "]");
-                correctAnswer = positionDiv.attr("data-shortnote");
+                correctAnswer = positionDiv.attr("data-notename");
                 $(".note.questionDiv").removeClass("questionDiv");
-                positionDiv.addClass("questionDiv flash");
+                positionDiv.addClass("questionDiv flashQuestion");
                 scrollTo(positionDiv);
             } else {
                 var newNote = randInAry(available);
@@ -183,8 +185,8 @@ function Fretboard(fretboardDiv, toggleControlsDiv, gameControlsDiv) {
                 }
                 correctAnswer = newNote;
                 setStaffNote(newNote);
-                $(".staffNote").addClass("flash")
-                $(".noteNameQuestion").text(newNote).addClass("flash");
+                $(".staffQuestionBox").addClass("flashQuestion")
+                $(".questionNote").text(newNote).addClass("flashQuestion");
                 if (pitchListener) {
                     pitchListener.listenFor(newNote);
                 }
@@ -370,11 +372,11 @@ function Fretboard(fretboardDiv, toggleControlsDiv, gameControlsDiv) {
             modeControls.setupMode();
         })
         function setupMode() {
-            $(".mainContent").children().first().prependTo(".holdingTank");
-            $(".mainContent").children().first().prependTo(".holdingTank");
-            $("#toggleControls").prependTo(".mainContent");
-            $(".fretboard").prependTo(".mainContent");
             $(".overContainer").removeClass("playMode").addClass("setupMode");
+            $(".mainContent").children().appendTo(".holdingTank");
+            $(".fretboard").appendTo(".mainContent");
+            $("#toggleControls").appendTo(".mainContent");
+            $(".mainFillerA").appendTo(".mainContent");
             $(".currentScore").text("0");
             $("#time").hide();
             showHighScore();
@@ -383,16 +385,34 @@ function Fretboard(fretboardDiv, toggleControlsDiv, gameControlsDiv) {
                 game.quit();
         }
         function playMode() {
-            $("#toggleControls").prependTo(".holdingTank");
+            $(".overContainer").addClass("playMode").removeClass("setupMode");
+            $(".mainContent").children().appendTo(".holdingTank");
             var questionMode = $("#QuestionMode").val();
             var answerMode = $("#AnswerMode").val();
-            $("." + answerMode).prependTo(".mainContent");
-            $("." + questionMode).prependTo(".mainContent");
-            $(".overContainer").addClass("playMode").removeClass("setupMode");
+            $(".mainFillerA").appendTo(".mainContent");
+            $("." + questionMode).appendTo(".mainContent");
+            $("." + answerMode).appendTo(".mainContent");
+            $(".mainFillerB").appendTo(".mainContent");
+            
             $("#time").show();
             var available = getAvailable();
-            if(answerMode === "staffAnswer"){
-                makeStaffInput(".staffInputDiv", function(){}, available);
+            if (answerMode === "staffAnswer") {
+                var availableNotes = [];
+                if(questionMode==="fretboard"){
+                    for(var i=0; i<available.length; i++){
+                        var noteName = $("[data-id="+available[i]+"]").attr("data-notename");
+                        if(availableNotes.indexOf(noteName)===-1){
+                            availableNotes.push(noteName);
+                        }
+                    }
+                }else{
+                    for(var i=0; i<available.length; i++){
+                        availableNotes.push(available[i]);
+                    }
+                }
+                $(".staffInputDiv").empty();
+                makeStaffInput(".staffInputDiv", function() {
+                }, availableNotes);
             }
             game = new Game(available);
         }
@@ -521,10 +541,13 @@ function Fretboard(fretboardDiv, toggleControlsDiv, gameControlsDiv) {
     }
     makeOtherControls();
     function makeAnswerControls() {
-        $("body").on("mouseup", ".playMode .note.available[data-notename]", function(event) {
+        $("body").on("mouseup", ".playMode .available[data-notename]", function(event) {
             event.stopPropagation();
+            if ($("#QuestionMode").val() === "fretboard" && $(this).parents().is(".fretboard")) {
+                return;
+            }
             var noteName = $(this).attr("data-notename");
-            $(this).addClass("flash");
+            $(this).addClass("flashAnswer");
             if (game) {
                 game.registerGuess(noteName);
             }
@@ -538,7 +561,7 @@ function Fretboard(fretboardDiv, toggleControlsDiv, gameControlsDiv) {
                     mod = "#";
                 } else {
                     var char = String.fromCharCode(e.keyCode)
-                    if (game && "ABCDEFG".indexOf(char) > -1 ) {
+                    if (game && "ABCDEFG".indexOf(char) > -1) {
                         game.registerGuess(char + mod);
                     }
 
@@ -557,80 +580,105 @@ function Fretboard(fretboardDiv, toggleControlsDiv, gameControlsDiv) {
 
     function getAvailable() {
         var available = [];
-        if ($("#QuestionMode").val()==="fretboard") {
+        if ($("#QuestionMode").val() === "fretboard") {
             $(".fretboard").find(".available").each(function(index, item) {
                 available.push($(item).attr("data-id"));
             })
         } else {
             $(".fretboard").find(".available").each(function(index, item) {
-                var note = $(item).attr("data-noteName");
+                var note = $(item).attr("data-notename");
                 if (available.indexOf(note === -1)) {
                     available.push(note);
                 }
-                /*
-                 var shortNote = $(item).attr("data-shortnote");
-                 if(available.indexOf(shortNote === -1)){
-                 available.push(shortNote);
-                 }*/
             })
         }
         return available;
     }
 
 }
-
-
-
-
-function makeTrebleClef(){
-                var trebDiv = $("<div>").addClass("notation").attr("data-note", "treble").html("&nbsp;");
-                $("<img>").addClass("trebleClef").attr("src", "MusicNotation/Treble_Clef_without_line.svg").appendTo(trebDiv);
-                return trebDiv;
+var scaleForMidi = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+var scaleForPlacement = "CDEFGAB";
+         function analyseNote(note){
+                var accidentals = {
+                    b: "flat",
+                    "#": "sharp",
+                }
+                var o = parseInt(note.substr(note.length-1));
+                if(note.length === 3){
+                    var accidental = note.substr(1, note.length-2);
+                }
+                accidental = accidentals[accidental];
+                note = note.substr(0,1);
+                var number = o * 7 + scaleForPlacement.indexOf(note);
+                return {note: note, o: o, accidental: accidental, number: number};
+            }   
+            function noteToMidi(note) {
+                var n = note.substring(0, note.length - 1);
+                var o = parseInt(note.substring(note.length - 1));
+                var noteIndex = scaleForMidi.indexOf(n);
+                o++;
+                return o * 12 + noteIndex;
             }
-            function makeStaffInput(staffInput, callBack, startNote, endNote){
-                var noteNumArray = [];
-                if(typeof startNote === "object"){
-                    noteNumArray = startNote;
-                    for(var i=0; i<noteNumArray.length; i++){
-                        noteNumArray[i] = analyseNote(noteNumArray[i]).number;
-                    }
-                }else{
-                    var startNum = analyseNote(startNote).number;
-                    var endNum = analyseNote(endNote).number + 1;
-                    for(var i=startNum; i<endNum; i++){
-                        noteNumArray.push(i);
-                    }
-                }
-                var divArray = [
-                    $("<div>").addClass("notation forInput").html("&nbsp;").appendTo(staffInput),
-                    $("<div>").addClass("notation forInput").html("&nbsp;").appendTo(staffInput),
-                    $("<div>").addClass("notation forInput").html("&nbsp;").appendTo(staffInput),
-                    $("<div>").addClass("notation forInput").html("&nbsp;").appendTo(staffInput)
-                ];
-                for(var i=0; i<noteNumArray.length; i++){
-                    var cssInfo = cssForNoteNumber(noteNumArray[i], true);
-                    var note = $("<img>").attr({src: "svg/noteHeadPlain.svg", "data-notename": numberToNote(i)})
-                            .addClass("inputNote available");
-                    note.css("top", (cssInfo.top + 18) +"px");
-                    var where = divArray[(i+divArray.length)%divArray.length];
-                    note.appendTo(where);
-                    if(!where.padded){
-                        where.padded = true;
-                        where.css("padding-bottom", cssInfo.paddingB);
-                    }
-                    where.css("padding-top", cssInfo.paddingT);
-                    where.paddingT = cssInfo.paddingT;
-                    note.click(callBack);
-                }
-                for(var divIndex = 0; divIndex<divArray.length; divIndex++){
-                    var div = divArray[divIndex];
-                    var paddingT = parseInt(div.css("padding-top"));
-                    div.children().each(function(index, note){
-                        note = $(note)
-                        var top = parseInt(note.css("top"));
-                        note.css("top", (top+paddingT) + "px");
-                    })
-                }
-                makeTrebleClef().prependTo(staffInput);
-                return staffInput;
+function numberToNote(number){
+                var index = number % 7;
+                var o = Math.floor(number / 7);
+                o;
+                return scaleForPlacement[index] + o;
             }
+            
+var cssForNoteNumber = function(noteNumber, guitar) {
+    if (guitar) {
+        noteNumber += 7;
+    }
+    var top = 6 * (36 - noteNumber) - 1;
+    var paddingB = 6 * (30 - noteNumber);
+    var paddingT = (noteNumber - 39) * 6;
+    return {top: top, paddingB: paddingB, paddingT: paddingT};
+};
+function makeTrebleClef() {
+    var trebDiv = $("<div>").addClass("notation").attr("data-note", "treble").html("&nbsp;");
+    $("<img>").addClass("trebleClef").attr("src", "MusicNotation/Treble_Clef_without_line.svg").appendTo(trebDiv);
+    return trebDiv;
+}
+function makeStaffInput(staffInput, callBack, noteNameArray) {
+    var noteNumArray = [];
+    noteNameArray.sort(function(a,b){
+        return noteToMidi(a)-noteToMidi(b);
+    })
+    for (var i = 0; i < noteNameArray.length; i++) {
+        noteNumArray.push(analyseNote(noteNameArray[i]));
+    }
+    var divArray = [
+        $("<div>").addClass("notation forInput").html("&nbsp;").appendTo(staffInput),
+        $("<div>").addClass("notation forInput").html("&nbsp;").appendTo(staffInput),
+        $("<div>").addClass("notation forInput").html("&nbsp;").appendTo(staffInput),
+        $("<div>").addClass("notation forInput").html("&nbsp;").appendTo(staffInput)
+    ];
+    for (var i = 0; i < noteNumArray.length; i++) {
+        var noteNum = noteNumArray[i].number;
+        var cssInfo = cssForNoteNumber(noteNum, true);
+        var note = $("<div>").attr({"data-notename": noteNameArray[i], "data-accidental": noteNumArray[i].accidental})
+                .addClass("inputNote available");
+        note.css("top", (cssInfo.top + 18) + "px");
+        var where = divArray[(i + divArray.length) % divArray.length];
+        note.appendTo(where);
+        if (!where.padded) {
+            where.padded = true;
+            where.css("padding-bottom", cssInfo.paddingB);
+        }
+        where.css("padding-top", cssInfo.paddingT);
+        where.paddingT = cssInfo.paddingT;
+        note.click(callBack);
+    }
+    for (var divIndex = 0; divIndex < divArray.length; divIndex++) {
+        var div = divArray[divIndex];
+        var paddingT = parseInt(div.css("padding-top"));
+        div.children().each(function(index, note) {
+            note = $(note)
+            var top = parseInt(note.css("top"));
+            note.css("top", (top + paddingT) + "px");
+        })
+    }
+    makeTrebleClef().prependTo(staffInput);
+    return staffInput;
+}
