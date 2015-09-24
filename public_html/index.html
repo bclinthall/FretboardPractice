@@ -162,7 +162,7 @@ and open the template in the editor.
              */
 
             $(function() {
-                new Fretboard($(".fretboard"), $("#toggleControls"), $(".noteNameAnswers"));
+                new Fretboard($(".fretboard"), $("#toggleControls"), $(".noteNameAnswer"));
                 stringCss();
             })
 
@@ -249,7 +249,7 @@ and open the template in the editor.
                 display: block;
             }
 
-            .noteNameAnswers{
+            .noteNameAnswer{
                 display: flex;
             }
 
@@ -333,6 +333,15 @@ and open the template in the editor.
 
             }
             $(function() {
+                function enableDisable(questionMode, answerMode){
+                    answerMode = answerMode.replace("Answer", "");
+                    questionMode = questionMode.replace("Question", "");
+                    $("#AnswerMode").children("option").prop("disabled", false);
+                    $("#QuestionMode").children("option").prop("disabled", false);
+                    $("#AnswerMode").children("[data-mode="+questionMode+"]").prop("disabled", true);
+                    $("#QuestionMode").children("[data-mode="+answerMode+"]").prop("disabled", true);
+                    $(".gameTypeControls").find("[value=false]").prop("disabled", true);
+                }
                 function gameTypeChange(){
                     var questionMode = $("#QuestionMode").val();
                     var answerMode = $("#AnswerMode").val();
@@ -344,28 +353,16 @@ and open the template in the editor.
                         return;
                     }
                     $(".playBtn").show();
-                    if(this.id==="QuestionMode"){
-                        $("#AnswerMode").children("option").prop("disabled", false);
-                        $("#AnswerMode").find("[value="+questionMode+"]").prop("disabled", true);
-                    }
-                    if(this.id==="AnswerMode"){
-                        $("#QuestionMode").children("option").prop("disabled", false);
-                        $("#QuestionMode").find("[value="+answerMode+"]").prop("disabled", true);
-                    }
-
+                    enableDisable(questionMode, answerMode)
                 }
                 $(".gameTypeControls").on("change", "select", gameTypeChange)
                 var questionMode = localStorage.getItem("questionMode");
                 var answerMode = localStorage.getItem("answerMode");
                 if(questionMode){
                     $("#QuestionMode").val(questionMode);
-                    $("#AnswerMode").children("option").prop("disabled", false);
-                    $("#AnswerMode").find("[value="+questionMode+"]").prop("disabled", true);
                 }
                 if(answerMode){
                     $("#AnswerMode").val(answerMode);
-                    $("#QuestionMode").children("option").prop("disabled", false);
-                    $("#QuestionMode").find("[value="+answerMode+"]").prop("disabled", true);
                 }
                 gameTypeChange();
 
@@ -380,16 +377,16 @@ and open the template in the editor.
                 <div class="topControls gameTypeControls">
                     <select id="QuestionMode">
                         <option value=false>Ask with...</option>
-                        <option value="fretboard">Fretboard</option>
-                        <option value="noteNameQuestion">Note Name</option>
-                        <option value="staffQuestion">Staff</option>
+                        <option value="fretboard" data-mode="fretboard">Fretboard</option>
+                        <option value="noteNameQuestion" data-mode="noteName">Note Name</option>
+                        <option value="staffQuestion" data-mode="staff">Staff</option>
                     </select>
                     <select id="AnswerMode">
                         <option value=false>Answer with...</option>
-                        <option value="fretboard">Fretboard</option>
-                        <option value="noteNameAnswers">Note Name</option>
-                        <option value="staffAnswer">Staff</option>
-                        <option value="guitarAnswer">Real Guitar</option>
+                        <option value="fretboard" data-mode="fretboard">Fretboard</option>
+                        <option value="noteNameAnswer" data-mode="noteName">Note Name</option>
+                        <option value="staffAnswer" data-mode="staff">Staff</option>
+                        <option value="guitarAnswer" data-mode="guitar">Real Guitar</option>
                     </select>
                 </div>
                 <div id="modeControls" class="topControls"></div>
@@ -440,7 +437,7 @@ and open the template in the editor.
             </div>
             <div class="fretboard"></div>
 
-            <div class="noteNameAnswers">
+            <div class="noteNameAnswer">
                 <div class="filler"></div>
                 <div class="ansBtns">
                     <div class="naturals">

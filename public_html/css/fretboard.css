@@ -91,7 +91,7 @@ html, body, .overContainer{
         height: 600%;
 
     }
-    .noteNameAnswers, .staffAnswer, .guitarAnswer, .staffQuestion, .noteNameQuestion{
+    .noteNameAnswer, .staffAnswer, .guitarAnswer, .staffQuestion, .noteNameQuestion{
         flex-direction: row;
         -webkit-flex-direction: row;
         -ms-flex-direction: row;
@@ -162,7 +162,7 @@ html, body, .overContainer{
         bottom: 0;
         width: 600%;
     }
-    .noteNameAnswers, .staffAnswer, .guitarAnswer, .staffQuestion, .noteNameQuestion{
+    .noteNameAnswer, .staffAnswer, .guitarAnswer, .staffQuestion, .noteNameQuestion{
         flex-direction: column;
         -webkit-flex-direction: column;
         -ms-flex-direction: column;
@@ -297,7 +297,7 @@ html, body, .overContainer{
 }
 
 
-.noteNameAnswers{
+.noteNameAnswer{
     flex: 1 1 100px;
     -webkit-flex: 1 1 100px;
     -ms-flex: 1 1 100px;

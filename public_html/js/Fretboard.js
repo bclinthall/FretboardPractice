@@ -554,7 +554,7 @@ function Fretboard(fretboardDiv, toggleControlsDiv, gameControlsDiv) {
         })
         var mod = "";
         $("body").on("keydown", function(e) {
-            if ($("#AnswerMode").val() === "noteNameAnswers" && $(".overContainer").hasClass("playMode")) {
+            if ($("#AnswerMode").val() === "noteNameAnswer" && $(".overContainer").hasClass("playMode")) {
                 if (e.which === 188) {
                     mod = "b";
                 } else if (e.which === 190) {
