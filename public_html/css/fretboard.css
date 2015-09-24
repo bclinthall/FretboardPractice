@@ -414,6 +414,8 @@ vertical-align: bottom;}
     padding: 15px;
     box-shadow: 6px 5px 5px rgba(0,0,0,.3);
     text-shadow: none;
+    max-height: 75%;
+    overflow: scroll;
 }
 #scoreDisplay>div{
     margin: 10px;
@@ -514,4 +516,23 @@ div#toggleControls * {
 .scoreOk{
     box-shadow: none;
     float:right;
+}
+.styledBtn{
+    display:inline-block;
+    border-radius: 10px;
+    border:1px solid black;
+    width: 15px;
+    height: 15px;
+    line-height: 15px;
+    text-align:center;
+    background-color:silver;
+    float:right;
+    margin-right: 8px!important;
+    font-size: small;
+    font-weight: bold;
+}
+.closeHelp{
+    position:absolute;
+    right: -10px;
+    top:-3px;
 }
