@@ -94,7 +94,8 @@ function Fretboard(fretboardDiv, toggleControlsDiv, gameControlsDiv) {
                 }
             }
             var onErr = function(err) {
-                console.log(err)
+                console.log(err);
+                quit();
             };
             pitchListener = new PitchListener(onListen, onErr, 2);
             pitchListener.startListening();
