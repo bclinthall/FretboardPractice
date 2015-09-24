@@ -394,6 +394,7 @@ vertical-align: bottom;}
     background-color: rgba(256,256,256,0.7);
 }
 .overlay{
+    background-color:rgba(0,0,0,0.3);
     position: absolute;
     left: 0;
     top: 0;
@@ -508,8 +509,9 @@ div#toggleControls * {
     box-shadow: 0px 0px 10px 10px gold;
     background-color: gold;
     text-shadow: none;
-    position: absolute;
-    top: 50%;
     display: inline-block;
-    transform: translateY(-50%);
+}
+.scoreOk{
+    box-shadow: none;
+    float:right;
 }

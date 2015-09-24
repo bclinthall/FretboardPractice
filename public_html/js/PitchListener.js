@@ -83,10 +83,10 @@ function PitchListener(onListen, onPermissionDenied, smoothing) {
         samplesPerWave = sampleRate / frequency;
         samplesPerHalfWave = samplesPerWave / 2;
         
-        while(fftSize < (samplesPerWave * 8) && fftSize < 32768){
+        while(fftSize < (samplesPerWave * 4) && fftSize < 32768){
             fftSize *= 2;
         }
-        while(fftSize > samplesPerWave * 16 && fftSize > 1024){
+        while(fftSize > samplesPerWave * 8 && fftSize > 1024){
             fftSize /=2;
         }
         if(analyser) analyser.fftSize = fftSize;

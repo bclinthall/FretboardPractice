@@ -43,18 +43,44 @@ function Fretboard(fretboardDiv, toggleControlsDiv, gameControlsDiv) {
         }
         var startTime = Date.now();
         var timerId;
-        var timeRemaining = 30;
+        var timeAllowed = 30;
         var correctAnswer;
         var currentScore = 0;
         var positionId;
-        var useGuitar = $(".overContainer").hasClass("guitarAnswer");
+        var gameOver = false;
+        var useGuitar = $("#AnswerMode").val() === "guitarAnswer";
         if (useGuitar) {
+            var readyState = 0;
             var canvas = $(".listenerCanvas")[0];
             var ctx = canvas.getContext("2d");
             window.ctx = ctx;
             var w = canvas.width;
             var h = canvas.height;
+            function waitForMic(){
+                if(!gameOver && readyState===0){
+                    startTime = Date.now();
+                    window.setTimeout(waitForMic, 250);
+                }
+            }
+            var countdownStartTime;
             var onListen = function(result) {
+                if(readyState === 0){
+                    readyState = 1;
+                    countdownStartTime = Date.now();
+                    $("#countdownOverlay").show();
+                    return;
+                }else if(readyState===1){
+                    var countdownLeft = 3000 - (Date.now()-countdownStartTime);
+                    if(countdownLeft<0){
+                        readyState = 2;
+                        startTime = Date.now();
+                        $("#countdownOverlay").hide();
+                    }else{
+                        startTime = Date.now();
+                        $("#countdown").text(Math.ceil(countdownLeft/1000));
+                    }
+                    return;
+                }
                 if (result.score > 1) {
                     ctx.fillStyle = "#0F0";
                 } else {
@@ -63,7 +89,6 @@ function Fretboard(fretboardDiv, toggleControlsDiv, gameControlsDiv) {
                 ctx.clearRect(0, 0, w, h);
                 ctx.fillRect(0, h - (result.score * h), w, result.score * h);
                 result.correctAnswer = correctAnswer;
-                console.log(result)
                 if (result.score > 1 && correctAnswer === result.note) {
                     registerCorrect();
                 }
@@ -73,6 +98,8 @@ function Fretboard(fretboardDiv, toggleControlsDiv, gameControlsDiv) {
             };
             pitchListener = new PitchListener(onListen, onErr, 2);
             pitchListener.startListening();
+            waitForMic();
+            
         }
 
 
@@ -194,7 +221,7 @@ function Fretboard(fretboardDiv, toggleControlsDiv, gameControlsDiv) {
         }
         newQuestion();
         function getTime() {
-            return timeRemaining - Math.floor((Date.now() - startTime) / 1000);
+            return timeAllowed - Math.floor((Date.now() - startTime) / 1000);
         }
         var prevTime = false;
         function showTime() {
@@ -210,6 +237,7 @@ function Fretboard(fretboardDiv, toggleControlsDiv, gameControlsDiv) {
         }
         showTime();
         function quit() {
+            gameOver = true;
             clearTimeout(timerId);
             var prevHighScore = getHighScore();
             $(".scoreMsg").text("");
@@ -367,11 +395,13 @@ function Fretboard(fretboardDiv, toggleControlsDiv, gameControlsDiv) {
     })
     makeFretboard(tuning);
     var modeControls = new function() {
-        $("#scoreDisplayOverlay").click(function() {
+        
+        $(".scoreOk").click(function() {
             $("#scoreDisplayOverlay").hide();
             modeControls.setupMode();
         })
         function setupMode() {
+            $(".playBtn").show();
             $(".overContainer").removeClass("playMode").addClass("setupMode");
             $(".mainContent").children().appendTo(".holdingTank");
             $(".fretboard").appendTo(".mainContent");
@@ -385,6 +415,7 @@ function Fretboard(fretboardDiv, toggleControlsDiv, gameControlsDiv) {
                 game.quit();
         }
         function playMode() {
+            $(".playBtn").hide();
             $(".overContainer").addClass("playMode").removeClass("setupMode");
             $(".mainContent").children().appendTo(".holdingTank");
             var questionMode = $("#QuestionMode").val();

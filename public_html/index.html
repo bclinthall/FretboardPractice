@@ -254,10 +254,6 @@ and open the template in the editor.
             }
 
             .listenerCanvas{
-                display:none;
-                vertical-align: baseline;
-                position:relative;
-                top: 37px;				
                 border: 1px solid black;
             }
             .setupMode .setupBtn{
@@ -411,7 +407,13 @@ and open the template in the editor.
                         <div><label>Previous High Score: </label><span class='highScore'></span></div>
                         <div><label>Last Score: </label><span class='currentScore'></span></div>
                         <div class='scoreMsg'>You're awesome</div>
+                        <button class="scoreOk">Ok</button>
                     </div>
+                </div>
+            </div>
+            <div id="countdownOverlay" class="overlay">
+                <div id="countdownInner" class="overlayInner">
+                    <span id="countdown"></span>
                 </div>
             </div>
         </div>
@@ -430,7 +432,7 @@ and open the template in the editor.
                 </div>
                 <div class="filler"></div>
             </div>
-            <div class="guitarAnswer"><div class="filler"></div><canvas class="listenerCanvas" style="height:30px; width: 10px;" height="30" width="10"></canvas><div class="filler"></div></div>
+            <div class="guitarAnswer"><div class="filler"></div><canvas class="listenerCanvas" style="height:60px; width: 30px;" height="30" width="10"></canvas><div class="filler"></div></div>
             <div class="staffAnswer">
                 <div class="filler"></div>
                 <div class="staffInputDiv"></div>
