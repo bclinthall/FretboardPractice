@@ -2,7 +2,7 @@ function Fretboard(fretboardDiv, toggleControlsDiv, gameControlsDiv) {
     var modeControlsDiv = $("#modeControls");
     var gameControlsDiv = gameControlsDiv ? $(gameControlsDiv) : $("#gameControls")
     var pitchListener;
-
+    var audioContext = new AudioContext();
     var noteNames = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
     var tuning = ["E2", "A2", "D3", "G3", "B3", "E4"]
     tuning.reverse();
@@ -97,7 +97,7 @@ function Fretboard(fretboardDiv, toggleControlsDiv, gameControlsDiv) {
                 console.log(err);
                 quit();
             };
-            pitchListener = new PitchListener(onListen, onErr, 2);
+            pitchListener = new PitchListener(onListen, onErr, 2, audioContext);
             pitchListener.startListening();
             waitForMic();
             

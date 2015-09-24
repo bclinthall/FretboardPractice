@@ -8,9 +8,9 @@
  * @returns {PitchListener.Anonym$1}
  */
 
-function PitchListener(onListen, onPermissionDenied, smoothing) {
+function PitchListener(onListen, onPermissionDenied, smoothing, audioContext) {
     var requestAnimationFrame = window.requestAnimationFrame || window.webkitRequestAnimationFrame;
-    var audioContext = new AudioContext();
+    var audioContext = audioContext || new AudioContext();
     var sampleRate = audioContext.sampleRate;
     var fftSize = 1024;
     var wholeWaves;
