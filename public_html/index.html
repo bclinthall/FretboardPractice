@@ -214,19 +214,20 @@ and open the template in the editor.
                         ["transparent", 4, "px"]
                     ]
                     portrait +=
-                            "\t" + ".string:nth-of-type(" + stringNum + ") .note{background-image: " +
+                            "\t" + "[data-stringindex='" + (stringNum-1) + "'] .note{background-image: " +
                             "\n\t\t" + linGrad("90deg", stops0) + ", " +
                             "\n\t\t" + linGrad("90deg", stops1) + ", " +
                             "\n\t\t" + linGrad("180deg", stops3) + ", " +
-                            "\n\t\t" + linGrad("180deg", stops2) + ";}\n" +
-                            "\n\t" + ".string:nth-of-type(" + stringNum + ") .note:first-child{background-image: none;}\n"
+                            "\n\t\t" + linGrad("180deg", stops2) + ";}\n"+
+                            "\t" + "[data-stringindex='" + (stringNum-1) + "'] .note.lastRealFret{" +
+                            "z-index:" +(7-stringNum) +";}\n"
+                            
                     landscape +=
-                            "\t" + ".string:nth-of-type(" + stringNum + ") .note{background-image: " +
+                            "\t" + "[data-stringindex='" + (stringNum-1) + "'] .note{background-image: " +
                             "\n\t\t" + linGrad("0deg", stops0) + ", " +
                             "\n\t\t" + linGrad("0deg", stops1) + ", " +
                             "\n\t\t" + linGrad("90deg", stops3) + ", " +
-                            "\n\t\t" + linGrad("90deg", stops2) + ";}\n" +
-                            "\t" + ".string:nth-of-type(" + stringNum + ") .note:first-child{background-image: none;}\n"
+                            "\n\t\t" + linGrad("90deg", stops2) + ";}\n"
 
                 }
 
@@ -239,7 +240,7 @@ and open the template in the editor.
 
                 portrait += "}"
                 landscape += "}"
-                $("<style>").html(portrait + "\n" + landscape).appendTo($("head"));
+                $("<style>").addClass("stringStyle").html(portrait + "\n" + landscape).appendTo($("head"));
             }
 
         </script>

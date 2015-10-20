@@ -102,29 +102,26 @@ function Fretboard(fretboardDiv, toggleControlsDiv, gameControlsDiv) {
             waitForMic();
 
         }
-        function flash(toFlash, color, callback) {
+        function flash(toFlash, className, callback) {
             var flashDur = 50;
-            toFlash.css({
-                "outline-color": color,
-                "outline-style": "solid"
-            });
-            var last;
+            toFlash.addClass(className);
             toFlash.each(function(index, item) {
                 var width = $(item).width();
                 var height = $(item).height();
                 var l = width < height ? width : height;
                 l /= 2;
-                l+=2;
+                l += 2;
                 $(item).css({
-                    "outline-width":l,
-                    "outline-offset": 0-l
+                    "outline-width": l,
+                    "outline-offset": 0 - l
                 })
             });
-            setTimeout(function(){
+            setTimeout(function() {
                 toFlash.css({
-                    "outline-width":0,
-                    "outline-offset": 0
+                    "outline-width": "",
+                    "outline-offset": ""
                 });
+                toFlash.removeClass(className);
                 callback();
             }, flashDur)
         }
@@ -136,7 +133,7 @@ function Fretboard(fretboardDiv, toggleControlsDiv, gameControlsDiv) {
         function registerIncorrect() {
             var toFlash = $(".flashAnswer, .flashQuestion");
             $(".flashAnswer").removeClass("flashAnswer");
-            flash(toFlash, "red", function() {
+            flash(toFlash, "flashingIncorrect", function() {
                 console.log("done");
             })
             currentScore--;
@@ -150,7 +147,7 @@ function Fretboard(fretboardDiv, toggleControlsDiv, gameControlsDiv) {
                     console.log(log);
                 var toFlash = $(".flashAnswer, .flashQuestion");
                 $(".flashAnswer").removeClass("flashAnswer");
-                flash(toFlash, "green", function() {
+                flash(toFlash, "flashingCorrect", function() {
                     newQuestion();
                     gotAnswer = false;
                 });
@@ -284,8 +281,13 @@ function Fretboard(fretboardDiv, toggleControlsDiv, gameControlsDiv) {
             var string = $("<div>")
                     .addClass("string")
                     .appendTo(fretboardDiv);
-            if (stringNum !== 0) {
-                string.attr("data-string", stringNum + " " + startNote);
+            string.attr("data-stringindex", stringNum);
+            if (i === 0) {
+                string.addClass("labelString");
+            } else if (i === 1) {
+                string.addClass("firstRealString");
+            } else if (i === tuning.length) {
+                string.addClass("lastString");
             }
             for (var j = 0; j < fretLengths.length; j++) {
                 makeNote(string, startIndex, fretLengths, stringNum, j);
@@ -300,7 +302,13 @@ function Fretboard(fretboardDiv, toggleControlsDiv, gameControlsDiv) {
                     .addClass("noteName")
                     .text(fret)
                     .appendTo(note);
-            if (stringNum !== 0 && fret < 19) {
+
+            if (stringNum === 0) {
+                note.attr("data-fretlabel", fret);
+            } else if (fret === 0) {
+                note.addClass("stringLabel");
+            }
+            if (stringNum !==0 && fret < 19) {
                 var i = stringNum - 1;
                 var noteName = midi[startIndex + fret];
                 var accidental = noteName.length === 3;
@@ -318,8 +326,12 @@ function Fretboard(fretboardDiv, toggleControlsDiv, gameControlsDiv) {
                 noteNameDiv.text(noteName)
                 $("<div>").addClass("questionIdentifier").appendTo(note);
             }
+            if(fret===18){
+                note.addClass("lastRealFret");
+            }
             if (fret === 19) {
                 noteNameDiv.text("");
+                note.addClass("nonFret");
             }
         }
         var fretLengths = makeFretLengthArray();

@@ -1,8 +1,8 @@
 html, body, .overContainer{
     height: 100%;
     width: 100%;
-    margin:0;
-    padding:0;
+    margin: 0;
+    padding: 0;
 
 }
 .overContainer{
@@ -72,8 +72,8 @@ html, body, .overContainer{
         -webkit-flex-direction: row;
         -ms-flex-direction: row;
     }
-    .string:last-child .note{
-        box-shadow:6px 5px 5px rgba(0,0,0,.3);
+    .string.lastString .note, .note.lastRealFret{
+        box-shadow: 6px 5px 5px rgba(0,0,0,.3);
     }
     /*.note{
             background-image: 
@@ -84,8 +84,8 @@ html, body, .overContainer{
         min-width: 1000px;
     }
 
-    .string:first-of-type .note::after{
-        left:4px;
+    .string.labelString .note::after{
+        left: 4px;
         top: 100%;
         right: 0;
         height: 600%;
@@ -146,9 +146,10 @@ html, body, .overContainer{
         -ms-flex-direction: column;
 
     }
-    .string:nth-child(2) .note{
-        box-shadow:6px 5px 5px rgba(0,0,0,.3);
+    .string.firstRealString .note, .note.lastRealFret{
+        box-shadow: 6px 5px 5px rgba(0,0,0,.3);
     }
+    
     /*.string:first-child{
             z-index: 2;
     }*/
@@ -156,8 +157,8 @@ html, body, .overContainer{
         min-height: 1000px;
     }
 
-    .string:first-of-type .note::after{
-        right:100%;
+    .string.labelString .note::after{
+        right: 100%;
         top: 4px;
         bottom: 0;
         width: 600%;
@@ -195,20 +196,20 @@ html, body, .overContainer{
 .fretboard{
     display: flex;
     display:
-    
-    
-    
-    -webkit-box;
+
+
+
+        -webkit-box;
     display: 
-    
-    
-    
-    -webkit-flex;
+
+
+
+        -webkit-flex;
     display: 
-    
-    
-    
-    -ms-flexbox;
+
+
+
+        -ms-flexbox;
     text-shadow: none;
 }
 .string{
@@ -225,25 +226,23 @@ html, body, .overContainer{
 }
 
 
-.string:first-child .note, .note:first-child{
-    background-image:none;
+.note[data-fretlabel], .note.stringLabel, .note.nonFret{
+    background-image: none!important;
     background-color: transparent;
     text-shadow: 6px 5px 5px rgba(0,0,0,.3);
-    box-shadow:none !important;
+    box-shadow: none!important;
 }
-.playMode .string:first-child .note, .playMode .note:first-child{
+.playMode .note[data-fretlabel], .note.stringLabel{
     text-shadow: none;
 }
-.note.available:first-child{
+.note.available.stringLabel{
     text-shadow: none;
 }
-
-
-.string:first-child .note{
+.note[data-fretlabel]{
     background-color: transparent;
     z-index: 2;
     pointer-events: none;
-    }
+}
 .note{
     display: inline-block;
     position:relative;
@@ -258,7 +257,7 @@ html, body, .overContainer{
 .note.hideFretNums{
     color: transparent;
 }
-.note:first-child{
+.note.stringLabel, .note[data-fretlabel='0']{
     flex-basis: 35px;
     -webkit-flex-basis: 35px;
     -ms-flex-basis: 35px;
@@ -271,26 +270,26 @@ html, body, .overContainer{
     -webkit-transform: translateX(-50%) translateY(-50%);
     -ms-transform: translateX(-50%) translateY(-50%);
 }
-.string:first-of-type .note{
+.note[data-fretlabel]{
     pointer-events: none;
 }
-.string:first-of-type .note::after{
+.note[data-fretlabel]::after{
     position: absolute;
     background-position: center;
     background-repeat: no-repeat;
 }
-.string:first-of-type .note:nth-of-type(4)::after, 
-.string:first-of-type .note:nth-of-type(6)::after, 
-.string:first-of-type .note:nth-of-type(8)::after, 
-.string:first-of-type .note:nth-of-type(10)::after,
-.string:first-of-type .note:nth-of-type(16)::after,
-.string:first-of-type .note:nth-of-type(18)::after{
+.note[data-fretlabel="4"]::after, 
+.note[data-fretlabel="6"]::after, 
+.note[data-fretlabel="8"]::after, 
+.note[data-fretlabel="10"]::after, 
+.note[data-fretlabel="16"]::after, 
+.note[data-fretlabel="18"]::after{
     content: "";
     background-image: url("../svg/single.svg");
     pointer-events: inherit;
 
 }
-.string:first-of-type .note:nth-of-type(13)::after{
+.note[data-fretlabel="13"]::after{
     content: "";
     background-image: url("../svg/singleDouble.svg");
     pointer-events: inherit;
@@ -318,7 +317,7 @@ html, body, .overContainer{
 }
 .staffQuestionBox{
 
-vertical-align: bottom;}
+    vertical-align: bottom;}
 .ansBtns{
     flex: 0 1 500px;
     -webkit-flex: 0 1 500px;
@@ -390,11 +389,11 @@ vertical-align: bottom;}
 .string .note.available{
     background-color: rgba(256,256,256,0.7);
 }
-.fromFret.playMode .string .note.available:first-child{
+.fromFret.playMode .string .note.available.stringLabel{
     background-color: rgba(256,256,256,0.7);
 }
 .overlay{
-    background-color:rgba(0,0,0,0.3);
+    background-color: rgba(0,0,0,0.3);
     position: absolute;
     left: 0;
     top: 0;
@@ -439,7 +438,7 @@ vertical-align: bottom;}
 #toggleControls h1{
     font-size: medium;
     padding: 0;
-    margin:0;
+    margin: 0;
 }
 #toggleControls h1:before{
     font-family: monospace;
@@ -503,9 +502,6 @@ div#toggleControls * {
 #toggleControls ul {
     margin-left: 5px;
 }
-.note:not([data-id]) {
-    background-color: rgb(186,180,165);
-}
 
 .questionNote{
     box-shadow: 0px 0px 10px 10px gold;
@@ -515,30 +511,38 @@ div#toggleControls * {
 }
 .scoreOk{
     box-shadow: none;
-    float:right;
+    float: right;
 }
 .styledBtn{
-    display:inline-block;
+    display:i nline-block;
     border-radius: 10px;
-    border:1px solid black;
+    border: 1px solid black;
     width: 15px;
     height: 15px;
     line-height: 15px;
-    text-align:center;
-    background-color:silver;
-    float:right;
+    text-align: center;
+    background-color: silver;
+    float: right;
     margin-right: 8px!important;
     font-size: small;
     font-weight: bold;
 }
 .closeHelp{
-    position:absolute;
+    position: absolute;
     right: -10px;
     top:-3px;
 }
 
 .flashAnswer, .flashQuestion{
-    outline-width:0px;
-    outline-offset:0px;
-    outline-style:solid;
+    outline-width: 0px;
+    outline-offset: 0px;
+
+}
+.flashingCorrect{
+    outline-color: green;
+    outline-style: solid;
+}
+.flashingIncorrect{
+    outline-color: red;
+    outline-style: solid;
 }
