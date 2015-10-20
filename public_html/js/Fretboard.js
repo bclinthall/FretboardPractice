@@ -171,18 +171,19 @@ function Fretboard(fretboardDiv, toggleControlsDiv, gameControlsDiv) {
             }
         }
         function scrollTo(div) {
+            console.log("scrollTo", div);
             var div = div[0];
             var rect = div.getBoundingClientRect();
             var winWidth = $("body").width();
             var winHeight = $("body").height();
-            if (rect.x < 0 || rect.x + rect.width > winWidth) {
+            if (rect.left < 0 || rect.left + rect.width > winWidth) {
                 var scrollLeft = $(".fretboard").scrollLeft();
-                $(".fretboard").animate({scrollLeft: scrollLeft + rect.x - 25}, 200);
+                $(".fretboard").animate({scrollLeft: scrollLeft + rect.left - 25}, 200);
             }
-            if (rect.y < 0 || rect.y + rect.height > winHeight) {
+            if (rect.top < 0 || rect.top + rect.height > winHeight) {
                 var scrollTop = $(".fretboard").scrollTop();
 
-                $(".fretboard").animate({scrollTop: scrollTop + rect.y - 25}, 200);
+                $(".fretboard").animate({scrollTop: scrollTop + rect.top - 25}, 200);
             }
         }
         function newQuestion() {
