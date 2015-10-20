@@ -347,12 +347,16 @@ and open the template in the editor.
                     console.log(questionMode, answerMode);
                     localStorage.setItem("questionMode", questionMode);
                     localStorage.setItem("answerMode", answerMode);
+                    $(".playBtn").show();
+                    answerMode = answerMode.replace("Answer", "");
+                    questionMode = questionMode.replace("Question", "");
                     if(questionMode==="false" || answerMode === "false"){
                         $(".playBtn").hide();
-                        return;
+                    }else if(questionMode===answerMode){
+                        $(".playBtn").prop({"disabled": true, "title": "question mode must differ from answer mode."})
+                    }else{
+                        $(".playBtn").prop({"disabled": false, "title": ""})
                     }
-                    $(".playBtn").show();
-                    enableDisable(questionMode, answerMode)
                 }
                 $(".gameTypeControls").on("change", "select", gameTypeChange)
                 var questionMode = localStorage.getItem("questionMode");
