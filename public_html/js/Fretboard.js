@@ -19,7 +19,7 @@ function Fretboard(fretboardDiv, toggleControlsDiv, gameControlsDiv) {
     function getGameKey() {
         var obj = {
             questionMode: $("#QuestionMode").val(),
-            answerMode:  $("#AnswerMode").val(),
+            answerMode: $("#AnswerMode").val(),
             tuning: tuning,
             available: getAvailable()
         }
@@ -56,28 +56,28 @@ function Fretboard(fretboardDiv, toggleControlsDiv, gameControlsDiv) {
             window.ctx = ctx;
             var w = canvas.width;
             var h = canvas.height;
-            function waitForMic(){
-                if(!gameOver && readyState===0){
+            function waitForMic() {
+                if (!gameOver && readyState === 0) {
                     startTime = Date.now();
                     window.setTimeout(waitForMic, 250);
                 }
             }
             var countdownStartTime;
             var onListen = function(result) {
-                if(readyState === 0){
+                if (readyState === 0) {
                     readyState = 1;
                     countdownStartTime = Date.now();
                     $("#countdownOverlay").show();
                     return;
-                }else if(readyState===1){
-                    var countdownLeft = 3000 - (Date.now()-countdownStartTime);
-                    if(countdownLeft<0){
+                } else if (readyState === 1) {
+                    var countdownLeft = 3000 - (Date.now() - countdownStartTime);
+                    if (countdownLeft < 0) {
                         readyState = 2;
                         startTime = Date.now();
                         $("#countdownOverlay").hide();
-                    }else{
+                    } else {
                         startTime = Date.now();
-                        $("#countdown").text(Math.ceil(countdownLeft/1000));
+                        $("#countdown").text(Math.ceil(countdownLeft / 1000));
                     }
                     return;
                 }
@@ -100,45 +100,44 @@ function Fretboard(fretboardDiv, toggleControlsDiv, gameControlsDiv) {
             pitchListener = new PitchListener(onListen, onErr, 2, audioContext);
             pitchListener.startListening();
             waitForMic();
-            
+
         }
-
-
-        function overlay(divs) {
-            var overlays = $();
-            divs.each(function(index, item) {
-                item = $(item);
-                var overlay = $("<div>")
-                        .height(item.height())
-                        .width(item.width())
-                        .css({
-                            position: "absolute",
-                            left: 0,
-                            top: 0,
-                        })
-                        .appendTo(item);
-                overlays = overlays.add(overlay)
-            })
-            return overlays;
+        function flash(toFlash, color, flashDur, times, callback) {
+            toFlash.css({
+                "outline-color": color,
+                "outline-style": "solid"
+            });
+            var last;
+            toFlash.each(function(index, item) {
+                var width = $(item).width();
+                var height = $(item).height();
+                var l = width < height ? width : height;
+                l /= 2;
+                l+=2;
+                $(item).css({
+                    "outline-width":l,
+                    "outline-offset": 0-l
+                })
+            });
+            setTimeout(function(){
+                toFlash.css({
+                    "outline-width":0,
+                    "outline-offset": 0
+                });
+                callback();
+            }, flashDur)
         }
-
         var time = 150;
         function showScore() {
             $(".currentScore").text(currentScore);
         }
         showHighScore();
         function registerIncorrect() {
-            var divOverlay = overlay($(".flashAnswer, .flashQuestion"));
-            divOverlay.hide();
-            divOverlay.css({"background-color": "red", "border-radius": "5px"})
-            divOverlay
-                    .fadeIn({duration: time, queue: true})
-                    .fadeOut({duration: time, queue: true})
-                    .fadeIn({duration: time, queue: true})
-                    .fadeOut({duration: time, queue: true, complete: function() {
-                            divOverlay.remove();
-                            $(".flashAnswer").removeClass("flashAnswer");
-                        }})
+            var toFlash = $(".flashAnswer, .flashQuestion");
+            $(".flashAnswer").removeClass("flashAnswer");
+            flash(toFlash, "red", 100, 1, function() {
+                console.log("done");
+            })
             currentScore--;
             showScore()
         }
@@ -146,21 +145,14 @@ function Fretboard(fretboardDiv, toggleControlsDiv, gameControlsDiv) {
         function registerCorrect(div, log) {
             if (!gotAnswer) {
                 gotAnswer = true;
-                if(log) console.log(log);
-                var divOverlay = overlay($(".flashAnswer, .flashQuestion"));
-                divOverlay.hide();
-                divOverlay.css({"background-color": "green", "border-radius": "5px"});
-                var count = divOverlay.length;
-                divOverlay
-                        .fadeIn({duration: time, queue: true})
-                        .fadeOut({duration: time, queue: true, complete: function() {
-                                $(this).remove();
-                                if (--count === 0) {
-                                    newQuestion();
-                                    gotAnswer = false;
-                                    $(".flashAnswer").removeClass("flashAnswer");
-                                }
-                            }})
+                if (log)
+                    console.log(log);
+                var toFlash = $(".flashAnswer, .flashQuestion");
+                $(".flashAnswer").removeClass("flashAnswer");
+                flash(toFlash, "green", 100, 1, function() {
+                    newQuestion();
+                    gotAnswer = false;
+                });
                 currentScore++;
                 showScore()
             }
@@ -396,7 +388,7 @@ function Fretboard(fretboardDiv, toggleControlsDiv, gameControlsDiv) {
     })
     makeFretboard(tuning);
     var modeControls = new function() {
-        
+
         $(".scoreOk").click(function() {
             $("#scoreDisplayOverlay").hide();
             modeControls.setupMode();
@@ -425,20 +417,20 @@ function Fretboard(fretboardDiv, toggleControlsDiv, gameControlsDiv) {
             $("." + questionMode).appendTo(".mainContent");
             $("." + answerMode).appendTo(".mainContent");
             $(".mainFillerB").appendTo(".mainContent");
-            
+
             $("#time").show();
             var available = getAvailable();
             if (answerMode === "staffAnswer") {
                 var availableNotes = [];
-                if(questionMode==="fretboard"){
-                    for(var i=0; i<available.length; i++){
-                        var noteName = $("[data-id="+available[i]+"]").attr("data-notename");
-                        if(availableNotes.indexOf(noteName)===-1){
+                if (questionMode === "fretboard") {
+                    for (var i = 0; i < available.length; i++) {
+                        var noteName = $("[data-id=" + available[i] + "]").attr("data-notename");
+                        if (availableNotes.indexOf(noteName) === -1) {
                             availableNotes.push(noteName);
                         }
                     }
-                }else{
-                    for(var i=0; i<available.length; i++){
+                } else {
+                    for (var i = 0; i < available.length; i++) {
                         availableNotes.push(available[i]);
                     }
                 }
@@ -630,34 +622,34 @@ function Fretboard(fretboardDiv, toggleControlsDiv, gameControlsDiv) {
 }
 var scaleForMidi = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
 var scaleForPlacement = "CDEFGAB";
-         function analyseNote(note){
-                var accidentals = {
-                    b: "flat",
-                    "#": "sharp",
-                }
-                var o = parseInt(note.substr(note.length-1));
-                if(note.length === 3){
-                    var accidental = note.substr(1, note.length-2);
-                }
-                accidental = accidentals[accidental];
-                note = note.substr(0,1);
-                var number = o * 7 + scaleForPlacement.indexOf(note);
-                return {note: note, o: o, accidental: accidental, number: number};
-            }   
-            function noteToMidi(note) {
-                var n = note.substring(0, note.length - 1);
-                var o = parseInt(note.substring(note.length - 1));
-                var noteIndex = scaleForMidi.indexOf(n);
-                o++;
-                return o * 12 + noteIndex;
-            }
-function numberToNote(number){
-                var index = number % 7;
-                var o = Math.floor(number / 7);
-                o;
-                return scaleForPlacement[index] + o;
-            }
-            
+function analyseNote(note) {
+    var accidentals = {
+        b: "flat",
+        "#": "sharp",
+    }
+    var o = parseInt(note.substr(note.length - 1));
+    if (note.length === 3) {
+        var accidental = note.substr(1, note.length - 2);
+    }
+    accidental = accidentals[accidental];
+    note = note.substr(0, 1);
+    var number = o * 7 + scaleForPlacement.indexOf(note);
+    return {note: note, o: o, accidental: accidental, number: number};
+}
+function noteToMidi(note) {
+    var n = note.substring(0, note.length - 1);
+    var o = parseInt(note.substring(note.length - 1));
+    var noteIndex = scaleForMidi.indexOf(n);
+    o++;
+    return o * 12 + noteIndex;
+}
+function numberToNote(number) {
+    var index = number % 7;
+    var o = Math.floor(number / 7);
+    o;
+    return scaleForPlacement[index] + o;
+}
+
 var cssForNoteNumber = function(noteNumber, guitar) {
     if (guitar) {
         noteNumber += 7;
@@ -674,8 +666,8 @@ function makeTrebleClef() {
 }
 function makeStaffInput(staffInput, callBack, noteNameArray) {
     var noteNumArray = [];
-    noteNameArray.sort(function(a,b){
-        return noteToMidi(a)-noteToMidi(b);
+    noteNameArray.sort(function(a, b) {
+        return noteToMidi(a) - noteToMidi(b);
     })
     for (var i = 0; i < noteNameArray.length; i++) {
         noteNumArray.push(analyseNote(noteNameArray[i]));
