@@ -102,7 +102,8 @@ function Fretboard(fretboardDiv, toggleControlsDiv, gameControlsDiv) {
             waitForMic();
 
         }
-        function flash(toFlash, color, flashDur, times, callback) {
+        function flash(toFlash, color, callback) {
+            var flashDur = 50;
             toFlash.css({
                 "outline-color": color,
                 "outline-style": "solid"
@@ -135,7 +136,7 @@ function Fretboard(fretboardDiv, toggleControlsDiv, gameControlsDiv) {
         function registerIncorrect() {
             var toFlash = $(".flashAnswer, .flashQuestion");
             $(".flashAnswer").removeClass("flashAnswer");
-            flash(toFlash, "red", 100, 1, function() {
+            flash(toFlash, "red", function() {
                 console.log("done");
             })
             currentScore--;
@@ -149,7 +150,7 @@ function Fretboard(fretboardDiv, toggleControlsDiv, gameControlsDiv) {
                     console.log(log);
                 var toFlash = $(".flashAnswer, .flashQuestion");
                 $(".flashAnswer").removeClass("flashAnswer");
-                flash(toFlash, "green", 100, 1, function() {
+                flash(toFlash, "green", function() {
                     newQuestion();
                     gotAnswer = false;
                 });
